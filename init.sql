@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
     `risk_level` VARCHAR(5) DEFAULT 'C1' COMMENT '风险等级(C1~C5)',
     `status` TINYINT DEFAULT 1 COMMENT '状态(0:禁用,1:正常)',
+    `role` VARCHAR(20) DEFAULT 'user' COMMENT '角色(user:普通用户,admin:管理员)',
     `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除(0:未删除,1:已删除)',
@@ -131,13 +132,17 @@ CREATE TABLE IF NOT EXISTS `chat_history` (
     CONSTRAINT `fk_chat_history_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI对话历史表';
 
+-- 插入管理员账号 (密码: 123456, BCrypt加密)
+INSERT INTO `user` (`username`, `password`, `real_name`, `phone`, `email`, `risk_level`, `status`, `role`) VALUES
+('admin', '$2a$10$5yCODmSrui7JRyYmmwPOUegqAAWe4GvIWgvwZmPadaWzVTD2SBTCS', '系统管理员', '13900139000', 'admin@finbrain.com', 'C5', 1, 'admin');
+
 -- 插入测试用户 (密码: 123456, BCrypt加密)
-INSERT INTO `user` (`username`, `password`, `real_name`, `phone`, `email`, `risk_level`, `status`) VALUES
-('testuser', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', '测试用户', '13800138000', 'test@finbrain.com', 'C3', 1);
+INSERT INTO `user` (`username`, `password`, `real_name`, `phone`, `email`, `risk_level`, `status`, `role`) VALUES
+('testuser', '$2a$10$5yCODmSrui7JRyYmmwPOUegqAAWe4GvIWgvwZmPadaWzVTD2SBTCS', '测试用户', '13800138000', 'test@finbrain.com', 'C3', 1, 'user');
 
 -- 插入测试用户账户
 INSERT INTO `user_account` (`user_id`, `total_asset`, `available_balance`, `frozen_balance`, `total_profit`) VALUES
-(1, 100000.00, 80000.00, 20000.00, 5000.00);
+(2, 100000.00, 80000.00, 20000.00, 5000.00);
 
 -- 插入测试理财产品
 INSERT INTO `financial_product` (`product_code`, `product_name`, `product_type`, `annual_return_rate`, `min_amount`, `term_days`, `sale_status`, `description`) VALUES

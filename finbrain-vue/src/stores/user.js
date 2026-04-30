@@ -4,15 +4,21 @@ import { login as loginApi, logout as logoutApi, getUserInfo } from '@/api/auth'
 import router from '@/router'
 
 export const useUserStore = defineStore('user', () => {
-  const token = ref(localStorage.getItem('token') || '')
+  const token = ref(sessionStorage.getItem('token') || '')
   const userInfo = ref(null)
 
   const login = async (loginForm) => {
     const res = await loginApi(loginForm)
     token.value = res.data.token
-    localStorage.setItem('token', res.data.token)
-    localStorage.setItem('userId', res.data.userId)
+    sessionStorage.setItem('token', res.data.token)
+    sessionStorage.setItem('userId', res.data.userId)
     await fetchUserInfo()
+    
+    if (res.data.role === 'admin') {
+      router.push('/admin/dashboard')
+    } else {
+      router.push('/dashboard')
+    }
     return res
   }
 
@@ -24,8 +30,8 @@ export const useUserStore = defineStore('user', () => {
     }
     token.value = ''
     userInfo.value = null
-    localStorage.removeItem('token')
-    localStorage.removeItem('userId')
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('userId')
     router.push('/login')
   }
 

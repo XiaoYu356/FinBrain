@@ -1,4 +1,4 @@
-import { aiRequest } from './request'
+import { aiRequest, request } from './request'
 
 export function chat(data) {
   return aiRequest({
@@ -34,14 +34,14 @@ export function chatStream(data, onMessage, onError, onComplete) {
 }
 
 export function getChatSessions() {
-  return aiRequest({
+  return request({
     url: '/chat/sessions',
     method: 'get'
   })
 }
 
 export function getChatHistory(sessionId) {
-  return aiRequest({
+  return request({
     url: `/chat/history/${sessionId}`,
     method: 'get'
   })

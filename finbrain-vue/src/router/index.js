@@ -18,6 +18,7 @@ const routes = [
     path: '/',
     component: () => import('@/components/Layout.vue'),
     redirect: '/dashboard',
+    meta: { requiresAuth: true },
     children: [
       {
         path: 'dashboard',
@@ -62,6 +63,44 @@ const routes = [
         meta: { requiresAuth: true, title: '个人中心' }
       }
     ]
+  },
+  {
+    path: '/admin',
+    component: () => import('@/components/AdminLayout.vue'),
+    redirect: '/admin/dashboard',
+    meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      {
+        path: 'dashboard',
+        name: 'AdminDashboard',
+        component: () => import('@/views/admin/AdminDashboard.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true, title: '管理首页' }
+      },
+      {
+        path: 'users',
+        name: 'AdminUsers',
+        component: () => import('@/views/admin/AdminUsers.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true, title: '用户管理' }
+      },
+      {
+        path: 'products',
+        name: 'AdminProducts',
+        component: () => import('@/views/admin/AdminProducts.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true, title: '产品管理' }
+      },
+      {
+        path: 'orders',
+        name: 'AdminOrders',
+        component: () => import('@/views/admin/AdminOrders.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true, title: '订单管理' }
+      },
+      {
+        path: 'assets',
+        name: 'AdminAssets',
+        component: () => import('@/views/admin/AdminAssets.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true, title: '资产管理' }
+      }
+    ]
   }
 ]
 
@@ -70,12 +109,16 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
+  const isLoggedIn = !!userStore.token
   
-  if (to.meta.requiresAuth && !userStore.token) {
+  if (to.meta.requiresAuth && !isLoggedIn) {
     next('/login')
-  } else if ((to.path === '/login' || to.path === '/register') && userStore.token) {
+  } else if ((to.path === '/login' || to.path === '/register') && isLoggedIn) {
+    const isAdmin = userStore.userInfo?.role === 'admin'
+    next(isAdmin ? '/admin/dashboard' : '/dashboard')
+  } else if (to.meta.requiresAdmin && userStore.userInfo?.role !== 'admin') {
     next('/dashboard')
   } else {
     next()

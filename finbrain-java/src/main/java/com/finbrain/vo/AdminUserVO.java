@@ -2,10 +2,11 @@ package com.finbrain.vo;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-public class UserVO {
+public class AdminUserVO {
 
     private Long id;
 
@@ -24,4 +25,10 @@ public class UserVO {
     private String role;
 
     private LocalDateTime createTime;
+
+    private BigDecimal totalAsset;
+
+    private BigDecimal availableBalance;
+
+    private BigDecimal totalProfit;
 }

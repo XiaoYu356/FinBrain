@@ -65,6 +65,7 @@ public class AuthServiceImpl implements AuthService {
         result.put("token", token);
         result.put("userId", user.getId());
         result.put("username", user.getUsername());
+        result.put("role", user.getRole());
         return result;
     }
 
@@ -86,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(dto.getEmail());
         user.setRiskLevel("C1");
         user.setStatus(1);
+        user.setRole("user");
         userMapper.insert(user);
         
         UserAccount account = new UserAccount();

@@ -41,8 +41,7 @@ request.interceptors.response.use(
         case 401:
           const userStore = useUserStore()
           userStore.logout()
-          router.push('/login')
-          ElMessage.error('登录已过期，请重新登录')
+          ElMessage.error('账号已被禁用或登录已过期，请重新登录')
           break
         case 403:
           ElMessage.error('没有权限访问')
