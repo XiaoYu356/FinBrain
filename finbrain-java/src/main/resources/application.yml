@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: finbrain-java
+  profiles:
+    active: dev
+
+jwt:
+  secret: ${JWT_SECRET:finbrain-jwt-secret-key-must-be-at-least-256-bits-long-for-security}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+logging:
+  level:
+    root: INFO
+    com.finbrain: DEBUG
