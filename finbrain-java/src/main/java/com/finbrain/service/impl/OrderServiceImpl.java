@@ -222,7 +222,6 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal balanceBefore = account.getAvailableBalance();
         BigDecimal balanceAfter = balanceBefore.add(redeemAmount);
         account.setAvailableBalance(balanceAfter);
-        account.setTotalAsset(account.getTotalAsset().subtract(redeemAmount));
         userAccountMapper.updateById(account);
         
         Transaction transaction = new Transaction();
