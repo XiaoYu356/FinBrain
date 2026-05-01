@@ -38,6 +38,10 @@ knife4j:
   setting:
     language: zh_cn
 
+ai:
+  service:
+    url: ${AI_SERVICE_URL:http://localhost:8001}
+
 logging:
   level:
     root: INFO

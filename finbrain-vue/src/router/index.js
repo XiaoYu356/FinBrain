@@ -99,6 +99,12 @@ const routes = [
         name: 'AdminAssets',
         component: () => import('@/views/admin/AdminAssets.vue'),
         meta: { requiresAuth: true, requiresAdmin: true, title: '资产管理' }
+      },
+      {
+        path: 'profile',
+        name: 'AdminProfile',
+        component: () => import('@/views/admin/AdminProfile.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true, title: '个人中心' }
       }
     ]
   }

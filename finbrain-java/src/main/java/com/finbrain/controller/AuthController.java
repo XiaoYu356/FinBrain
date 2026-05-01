@@ -1,7 +1,9 @@
 package com.finbrain.controller;
 
+import com.finbrain.dto.ChangePasswordDTO;
 import com.finbrain.dto.LoginDTO;
 import com.finbrain.dto.RegisterDTO;
+import com.finbrain.dto.UpdateProfileDTO;
 import com.finbrain.service.AuthService;
 import com.finbrain.utils.Result;
 import com.finbrain.vo.UserVO;
@@ -57,5 +59,19 @@ public class AuthController {
     @GetMapping("/info")
     public Result<UserVO> getCurrentUserInfo() {
         return Result.success(authService.getCurrentUserInfo());
+    }
+
+    @Operation(summary = "修改密码")
+    @PutMapping("/change-password")
+    public Result<Void> changePassword(@RequestBody ChangePasswordDTO dto) {
+        authService.changePassword(dto);
+        return Result.success();
+    }
+
+    @Operation(summary = "更新个人信息")
+    @PutMapping("/profile")
+    public Result<Void> updateProfile(@RequestBody UpdateProfileDTO dto) {
+        authService.updateProfile(dto);
+        return Result.success();
     }
 }

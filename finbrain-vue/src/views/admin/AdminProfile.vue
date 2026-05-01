@@ -1,12 +1,12 @@
 <template>
-  <div class="profile-container">
+  <div class="admin-profile">
     <el-row :gutter="20">
       <el-col :span="8">
         <el-card>
           <div class="user-info">
             <el-avatar :size="80" icon="User" />
             <h3>{{ userStore.userInfo?.username }}</h3>
-            <p>风险等级: {{ userStore.userInfo?.riskLevel || '未测评' }}</p>
+            <el-tag type="danger">管理员</el-tag>
           </div>
         </el-card>
       </el-col>
@@ -27,10 +27,6 @@
             </el-form-item>
             <el-form-item label="邮箱">
               <el-input v-model="form.email" />
-            </el-form-item>
-            <el-form-item label="风险等级">
-              <el-tag>{{ form.riskLevel || '未测评' }}</el-tag>
-              <el-button type="primary" text @click="$router.push('/risk')">重新测评</el-button>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="handleUpdate" :loading="updateLoading">保存修改</el-button>
@@ -82,8 +78,7 @@ const form = reactive({
   username: '',
   realName: '',
   phone: '',
-  email: '',
-  riskLevel: ''
+  email: ''
 })
 
 const passwordForm = reactive({
@@ -157,10 +152,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.profile-container {
-  padding: 0;
-}
-
 .user-info {
   text-align: center;
   padding: 20px 0;
@@ -169,10 +160,5 @@ onMounted(() => {
 .user-info h3 {
   margin: 15px 0 10px;
   color: #303133;
-}
-
-.user-info p {
-  color: #909399;
-  font-size: 14px;
 }
 </style>

@@ -151,6 +151,7 @@ import { useUserStore } from '@/stores/user'
 import { getAssetInfo } from '@/api/account'
 import { getProductList } from '@/api/product'
 import { useRouter } from 'vue-router'
+import { formatMoney, getRiskTagType, getRiskDesc } from '@/utils/format'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -176,20 +177,8 @@ const riskColor = computed(() => {
 })
 
 const riskDesc = computed(() => {
-  const level = userStore.userInfo?.riskLevel || 'C1'
-  const descs = { C1: '保守型', C2: '谨慎型', C3: '稳健型', C4: '进取型', C5: '激进型' }
-  return descs[level] || '保守型'
+  return getRiskDesc(userStore.userInfo?.riskLevel || 'C1')
 })
-
-const formatMoney = (value) => {
-  if (!value) return '¥0.00'
-  return '¥' + Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-const getRiskTagType = (type) => {
-  const types = { R1: 'success', R2: 'success', R3: 'warning', R4: 'danger', R5: 'danger' }
-  return types[type] || 'info'
-}
 
 const handleBuy = (product) => {
   router.push(`/products?id=${product.id}`)

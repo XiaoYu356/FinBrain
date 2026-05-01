@@ -29,3 +29,10 @@ export function getOrderList(params) {
     params
   })
 }
+
+export function getOrderDetail(orderId) {
+  return request({
+    url: `/order/${orderId}`,
+    method: 'get'
+  })
+}

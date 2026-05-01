@@ -3,8 +3,10 @@ package com.finbrain.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.finbrain.dto.ChangePasswordDTO;
 import com.finbrain.dto.LoginDTO;
 import com.finbrain.dto.RegisterDTO;
+import com.finbrain.dto.UpdateProfileDTO;
 import com.finbrain.entity.User;
 import com.finbrain.entity.UserAccount;
 import com.finbrain.exception.BusinessException;
@@ -150,5 +152,29 @@ public class AuthServiceImpl implements AuthService {
         UserVO vo = new UserVO();
         BeanUtil.copyProperties(user, vo);
         return vo;
+    }
+
+    @Override
+    public void changePassword(ChangePasswordDTO dto) {
+        User user = getCurrentUser();
+        
+        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+            throw new BusinessException("当前密码错误");
+        }
+        
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userMapper.updateById(user);
+        log.info("用户 {} 修改密码", user.getUsername());
+    }
+
+    @Override
+    public void updateProfile(UpdateProfileDTO dto) {
+        User user = getCurrentUser();
+        
+        user.setRealName(dto.getRealName());
+        user.setPhone(dto.getPhone());
+        user.setEmail(dto.getEmail());
+        userMapper.updateById(user);
+        log.info("用户 {} 更新个人信息", user.getUsername());
     }
 }

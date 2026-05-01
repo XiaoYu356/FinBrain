@@ -116,6 +116,20 @@ CREATE TABLE IF NOT EXISTS `transaction` (
     CONSTRAINT `fk_transaction_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='交易流水表';
 
+-- AI对话会话表
+CREATE TABLE IF NOT EXISTS `chat_session` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '会话ID',
+    `session_id` VARCHAR(36) NOT NULL COMMENT '会话唯一标识',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `title` VARCHAR(100) DEFAULT '新对话' COMMENT '会话标题',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_session_id` (`session_id`),
+    KEY `idx_user_id` (`user_id`),
+    CONSTRAINT `fk_chat_session_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI对话会话表';
+
 -- AI对话历史表
 CREATE TABLE IF NOT EXISTS `chat_history` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '消息ID',

@@ -97,6 +97,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { getAdminProductList, addProduct, updateProduct, updateProductSaleStatus, deleteProduct } from '@/api/admin'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { formatMoney, getRiskTagType, getSaleText } from '@/utils/format'
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -128,28 +129,13 @@ const rules = {
   termDays: [{ required: true, message: '请输入期限', trigger: 'blur' }]
 }
 
-const formatMoney = (value) => {
-  if (!value) return '¥0.00'
-  return '¥' + Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
 const indexMethod = (index) => {
   return (pageNum.value - 1) * pageSize.value + index + 1
-}
-
-const getRiskTagType = (type) => {
-  const types = { R1: 'success', R2: 'success', R3: 'warning', R4: 'danger', R5: 'danger' }
-  return types[type] || 'info'
 }
 
 const getSaleTagType = (status) => {
   const types = { 0: 'info', 1: 'success', 2: 'warning' }
   return types[status] || 'info'
-}
-
-const getSaleText = (status) => {
-  const texts = { 0: '停售', 1: '在售', 2: '售罄' }
-  return texts[status] || '未知'
 }
 
 const fetchProducts = async () => {

@@ -1,36 +1,11 @@
-import { aiRequest, request } from './request'
+import { request } from './request'
 
 export function chat(data) {
-  return aiRequest({
-    url: '/chat',
+  return request({
+    url: '/ai/chat',
     method: 'post',
     data
   })
-}
-
-export function chatStream(data, onMessage, onError, onComplete) {
-  const eventSource = new EventSource(`/ai/chat/stream?message=${encodeURIComponent(data.message)}&user_id=${data.user_id}&session_id=${data.session_id}`)
-  
-  eventSource.onmessage = (event) => {
-    if (event.data === '[DONE]') {
-      eventSource.close()
-      if (onComplete) onComplete()
-      return
-    }
-    try {
-      const parsed = JSON.parse(event.data)
-      if (onMessage) onMessage(parsed)
-    } catch (e) {
-      if (onMessage) onMessage({ content: event.data })
-    }
-  }
-  
-  eventSource.onerror = (error) => {
-    eventSource.close()
-    if (onError) onError(error)
-  }
-  
-  return eventSource
 }
 
 export function getChatSessions() {
@@ -40,9 +15,23 @@ export function getChatSessions() {
   })
 }
 
+export function createChatSession() {
+  return request({
+    url: '/chat/sessions',
+    method: 'post'
+  })
+}
+
 export function getChatHistory(sessionId) {
   return request({
     url: `/chat/history/${sessionId}`,
     method: 'get'
+  })
+}
+
+export function deleteChatSession(sessionId) {
+  return request({
+    url: `/chat/sessions/${sessionId}`,
+    method: 'delete'
   })
 }

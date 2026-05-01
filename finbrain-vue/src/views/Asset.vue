@@ -62,6 +62,11 @@
                 <span style="color: #F56C6C;">{{ row.annualReturnRate }}%</span>
               </template>
             </el-table-column>
+            <el-table-column prop="termDays" label="期限" width="80">
+              <template #default="{ row }">
+                {{ row.termDays }}天
+              </template>
+            </el-table-column>
             <el-table-column prop="expectedIncome" label="预计收益" width="150">
               <template #default="{ row }">
                 <span style="color: #67C23A;">{{ formatMoney(row.expectedIncome) }}</span>
@@ -107,6 +112,7 @@ import * as echarts from 'echarts'
 import { getAssetInfo, recharge } from '@/api/account'
 import { getOrderList, redeemOrder } from '@/api/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { formatMoney, getRiskTagType, calculateExpectedIncome } from '@/utils/format'
 
 const pieChartRef = ref()
 const loading = ref(false)
@@ -123,16 +129,6 @@ const asset = ref({
 
 const holdings = ref([])
 
-const formatMoney = (value) => {
-  if (!value) return '¥0.00'
-  return '¥' + Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-const getRiskTagType = (type) => {
-  const types = { R1: 'success', R2: 'success', R3: 'warning', R4: 'danger', R5: 'danger' }
-  return types[type] || 'info'
-}
-
 const showRechargeDialog = () => {
   rechargeAmount.value = 10000
   rechargeVisible.value = true
@@ -146,8 +142,8 @@ const handleRecharge = async () => {
   
   rechargeLoading.value = true
   try {
-    await recharge(rechargeAmount.value)
-    ElMessage.success(`充值成功！到账 ${formatMoney(rechargeAmount.value)}`)
+    const res = await recharge(rechargeAmount.value)
+    ElMessage.success('充值成功')
     rechargeVisible.value = false
     fetchData()
   } catch (e) {
@@ -170,7 +166,7 @@ const handleRedeem = async (row) => {
     )
     
     await redeemOrder(row.id)
-    ElMessage.success(`赎回成功！到账 ${formatMoney(row.amount)}`)
+    ElMessage.success('赎回成功')
     fetchData()
   } catch (e) {
     if (e !== 'cancel') {
@@ -228,7 +224,7 @@ const fetchData = async () => {
       .filter(o => o.status === 1)
       .map(o => ({
         ...o,
-        expectedIncome: Number(o.amount) * (Number(o.annualReturnRate) || 0) / 100
+        expectedIncome: calculateExpectedIncome(o.amount, o.annualReturnRate, o.termDays)
       }))
     
     initPieChart()

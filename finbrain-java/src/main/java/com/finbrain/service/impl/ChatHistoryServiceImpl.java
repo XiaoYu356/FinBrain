@@ -52,17 +52,15 @@ public class ChatHistoryServiceImpl implements ChatHistoryService {
 
     @Override
     public List<String> getSessionIds(Long userId) {
-        List<ChatHistory> histories = chatHistoryMapper.selectList(
+        return chatHistoryMapper.selectSessionIdsByUserId(userId);
+    }
+
+    @Override
+    public void deleteBySessionId(Long userId, String sessionId) {
+        chatHistoryMapper.delete(
                 new LambdaQueryWrapper<ChatHistory>()
                         .eq(ChatHistory::getUserId, userId)
-                        .select(ChatHistory::getSessionId)
-                        .groupBy(ChatHistory::getSessionId)
-                        .orderByDesc(ChatHistory::getCreateTime)
+                        .eq(ChatHistory::getSessionId, sessionId)
         );
-        
-        return histories.stream()
-                .map(ChatHistory::getSessionId)
-                .distinct()
-                .collect(Collectors.toList());
     }
 }

@@ -119,7 +119,7 @@
         </el-form-item>
         <el-form-item label="预计收益">
           <span style="color: #67C23A; font-weight: 600;">
-            {{ calculateExpectedIncome() }}
+            {{ formatMoney(calculateExpectedIncome(buyForm.amount, currentProduct.annualReturnRate, currentProduct.termDays)) }}
           </span>
         </el-form-item>
       </el-form>
@@ -133,9 +133,10 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { searchProducts } from '@/api/product'
+import { searchProducts, getProductById } from '@/api/product'
 import { createOrder } from '@/api/order'
 import { ElMessage } from 'element-plus'
+import { formatMoney, getRiskTagType, calculateExpectedIncome } from '@/utils/format'
 
 const loading = ref(false)
 const showSearch = ref(false)
@@ -160,16 +161,6 @@ const currentProduct = ref({})
 const buyForm = reactive({
   amount: 0
 })
-
-const formatMoney = (value) => {
-  if (!value) return '¥0.00'
-  return '¥' + Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-const getRiskTagType = (type) => {
-  const types = { R1: 'success', R2: 'success', R3: 'warning', R4: 'danger', R5: 'danger' }
-  return types[type] || 'info'
-}
 
 const fetchProducts = async () => {
   loading.value = true
@@ -205,23 +196,21 @@ const resetSearch = () => {
   handleSearch()
 }
 
-const showDetail = (product) => {
-  currentProduct.value = product
-  detailVisible.value = true
+const showDetail = async (product) => {
+  try {
+    const res = await getProductById(product.id)
+    currentProduct.value = res.data
+    detailVisible.value = true
+  } catch (e) {
+    currentProduct.value = product
+    detailVisible.value = true
+  }
 }
 
 const showBuyDialog = (product) => {
   currentProduct.value = product
   buyForm.amount = Number(product.minAmount) || 0
   buyVisible.value = true
-}
-
-const calculateExpectedIncome = () => {
-  const amount = buyForm.amount || 0
-  const rate = currentProduct.value.annualReturnRate || 0
-  const days = currentProduct.value.termDays || 0
-  const income = amount * rate / 100 * days / 365
-  return formatMoney(income)
 }
 
 const handleBuy = async () => {

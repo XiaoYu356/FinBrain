@@ -32,6 +32,10 @@
           <el-icon><Wallet /></el-icon>
           <span>资产管理</span>
         </el-menu-item>
+        <el-menu-item index="/admin/profile">
+          <el-icon><Setting /></el-icon>
+          <span>个人中心</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     <el-container>
@@ -47,6 +51,7 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
+                <el-dropdown-item command="profile">个人中心</el-dropdown-item>
                 <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -62,10 +67,11 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
 
 const activeMenu = computed(() => route.path)
@@ -74,6 +80,8 @@ const pageTitle = computed(() => route.meta?.title || '管理首页')
 const handleCommand = (command) => {
   if (command === 'logout') {
     userStore.logout()
+  } else if (command === 'profile') {
+    router.push('/admin/profile')
   }
 }
 </script>

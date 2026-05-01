@@ -75,8 +75,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getOrderList, cancelOrder } from '@/api/order'
+import { getOrderList, getOrderDetail, cancelOrder } from '@/api/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { formatMoney, formatTime, getStatusTagType } from '@/utils/format'
 
 const loading = ref(false)
 const orders = ref([])
@@ -86,21 +87,6 @@ const pageSize = ref(10)
 
 const detailVisible = ref(false)
 const currentOrder = ref({})
-
-const formatMoney = (value) => {
-  if (!value) return '¥0.00'
-  return '¥' + Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-const formatTime = (time) => {
-  if (!time) return ''
-  return new Date(time).toLocaleString('zh-CN')
-}
-
-const getStatusTagType = (status) => {
-  const types = { 0: 'warning', 1: 'success', 2: 'info', 3: 'danger' }
-  return types[status] || 'info'
-}
 
 const fetchOrders = async () => {
   loading.value = true
@@ -133,9 +119,15 @@ const handleCancel = async (order) => {
   }
 }
 
-const showDetail = (order) => {
-  currentOrder.value = order
-  detailVisible.value = true
+const showDetail = async (order) => {
+  try {
+    const res = await getOrderDetail(order.id)
+    currentOrder.value = res.data
+    detailVisible.value = true
+  } catch (e) {
+    currentOrder.value = order
+    detailVisible.value = true
+  }
 }
 
 onMounted(() => {

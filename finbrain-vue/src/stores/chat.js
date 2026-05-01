@@ -18,6 +18,10 @@ export const useChatStore = defineStore('chat', () => {
     sessionId.value = id
   }
 
+  const loadMessages = (historyMessages) => {
+    messages.value = historyMessages
+  }
+
   const newSession = () => {
     sessionId.value = generateSessionId()
     messages.value = []
@@ -40,6 +44,7 @@ export const useChatStore = defineStore('chat', () => {
     addMessage,
     clearMessages,
     setSessionId,
+    loadMessages,
     newSession,
     initSession
   }

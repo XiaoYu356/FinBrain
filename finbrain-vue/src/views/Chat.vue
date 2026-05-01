@@ -12,13 +12,17 @@
           <div class="session-list">
             <div 
               v-for="session in sessions" 
-              :key="session" 
+              :key="session.sessionId" 
               class="session-item"
-              :class="{ active: session === chatStore.sessionId }"
-              @click="loadSession(session)"
+              :class="{ active: session.sessionId === chatStore.sessionId }"
+              @click="loadSession(session.sessionId)"
             >
               <el-icon><ChatDotRound /></el-icon>
-              <span>{{ session.substring(0, 20) }}...</span>
+              <span class="session-title">{{ session.title }}</span>
+              <el-icon class="delete-icon" @click.stop="handleDeleteSession(session.sessionId)"><Delete /></el-icon>
+            </div>
+            <div v-if="sessions.length === 0" class="empty-sessions">
+              暂无历史会话
             </div>
           </div>
         </el-card>
@@ -83,7 +87,8 @@
 import { ref, onMounted, nextTick } from 'vue'
 import { useChatStore } from '@/stores/chat'
 import { useUserStore } from '@/stores/user'
-import { chat } from '@/api/chat'
+import { chat, getChatSessions, getChatHistory, deleteChatSession, createChatSession } from '@/api/chat'
+import { ElMessageBox } from 'element-plus'
 import { marked } from 'marked'
 
 const chatStore = useChatStore()
@@ -117,6 +122,30 @@ const scrollToBottom = () => {
   })
 }
 
+const fetchSessions = async () => {
+  try {
+    const res = await getChatSessions()
+    sessions.value = res.data || []
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const loadSession = async (sessionId) => {
+  chatStore.setSessionId(sessionId)
+  try {
+    const res = await getChatHistory(sessionId)
+    const historyMessages = (res.data || []).map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }))
+    chatStore.loadMessages(historyMessages)
+    scrollToBottom()
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 const sendMessage = async () => {
   if (!inputMessage.value.trim() || chatStore.isLoading) return
   
@@ -130,16 +159,16 @@ const sendMessage = async () => {
   try {
     const res = await chat({
       message: message,
-      user_id: localStorage.getItem('userId'),
-      session_id: chatStore.sessionId
+      sessionId: chatStore.sessionId
     })
     
-    chatStore.addMessage({ role: 'assistant', content: res.response || res.content || '抱歉，我无法理解您的问题。' })
+    chatStore.addMessage({ role: 'assistant', content: res.data.response || '抱歉，我无法理解您的问题。' })
   } catch (e) {
     chatStore.addMessage({ role: 'assistant', content: '抱歉，服务暂时不可用，请稍后再试。' })
   } finally {
     chatStore.isLoading = false
     scrollToBottom()
+    fetchSessions()
   }
 }
 
@@ -148,18 +177,46 @@ const sendQuickQuestion = (question) => {
   sendMessage()
 }
 
-const newSession = () => {
-  chatStore.newSession()
-  sessions.value.unshift(chatStore.sessionId)
+const handleDeleteSession = async (sessionId) => {
+  try {
+    await ElMessageBox.confirm('确定删除该会话吗？删除后不可恢复。', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await deleteChatSession(sessionId)
+    if (chatStore.sessionId === sessionId) {
+      chatStore.newSession()
+    }
+    fetchSessions()
+  } catch (e) {
+    if (e !== 'cancel') {
+      console.error(e)
+    }
+  }
 }
 
-const loadSession = (sessionId) => {
-  chatStore.setSessionId(sessionId)
+const newSession = async () => {
+  try {
+    const res = await createChatSession()
+    const session = res.data
+    chatStore.setSessionId(session.sessionId)
+    chatStore.clearMessages()
+    sessions.value.unshift(session)
+  } catch (e) {
+    console.error(e)
+  }
 }
 
-onMounted(() => {
-  chatStore.initSession()
-  scrollToBottom()
+onMounted(async () => {
+  await fetchSessions()
+  if (sessions.value.length > 0) {
+    const latestSession = sessions.value[0]
+    chatStore.setSessionId(latestSession.sessionId)
+    await loadSession(latestSession.sessionId)
+  } else {
+    await newSession()
+  }
 })
 </script>
 
@@ -202,6 +259,20 @@ onMounted(() => {
 .session-item.active {
   background: #ecf5ff;
   color: #409EFF;
+}
+
+.session-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.empty-sessions {
+  text-align: center;
+  color: #909399;
+  font-size: 13px;
+  padding: 20px;
 }
 
 .chat-card {

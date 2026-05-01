@@ -5,11 +5,6 @@ import router from '@/router'
 
 const request = axios.create({
   baseURL: '/api',
-  timeout: 30000
-})
-
-const aiRequest = axios.create({
-  baseURL: '/ai',
   timeout: 60000
 })
 
@@ -62,25 +57,4 @@ request.interceptors.response.use(
   }
 )
 
-aiRequest.interceptors.request.use(
-  config => {
-    const userStore = useUserStore()
-    if (userStore.token) {
-      config.headers['Authorization'] = `Bearer ${userStore.token}`
-    }
-    return config
-  },
-  error => {
-    return Promise.reject(error)
-  }
-)
-
-aiRequest.interceptors.response.use(
-  response => response.data,
-  error => {
-    ElMessage.error('AI服务请求失败')
-    return Promise.reject(error)
-  }
-)
-
-export { request, aiRequest }
+export { request }
