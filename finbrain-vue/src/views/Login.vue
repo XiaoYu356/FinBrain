@@ -10,6 +10,9 @@
           <el-input v-model="form.password" type="password" placeholder="密码" prefix-icon="Lock" show-password />
         </el-form-item>
         <el-form-item>
+          <el-checkbox v-model="form.rememberMe">记住我</el-checkbox>
+        </el-form-item>
+        <el-form-item>
           <el-button type="primary" :loading="loading" @click="handleLogin" class="login-btn">
             登录
           </el-button>
@@ -35,7 +38,8 @@ const formRef = ref()
 const loading = ref(false)
 const form = reactive({
   username: '',
-  password: ''
+  password: '',
+  rememberMe: false
 })
 
 const rules = {
@@ -47,7 +51,7 @@ const handleLogin = async () => {
   await formRef.value.validate()
   loading.value = true
   try {
-    await userStore.login(form)
+    await userStore.login(form, form.rememberMe)
     ElMessage.success('登录成功')
   } catch (e) {
     console.error(e)
