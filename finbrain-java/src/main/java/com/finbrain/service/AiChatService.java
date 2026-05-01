@@ -48,8 +48,12 @@ public class AiChatService {
                     .body(requestBody.toString())
                     .contentType("application/json")
                     .timeout(120000)
+                    .setConnectionTimeout(30000)
+                    .setReadTimeout(120000)
                     .execute();
 
+            log.info("AI服务响应: status={}", response.getStatus());
+            
             if (!response.isOk()) {
                 log.error("AI 服务请求失败, status={}, body={}", response.getStatus(), response.body());
                 String fallbackResponse = "抱歉，AI服务暂时不可用，请稍后再试。";
@@ -57,10 +61,18 @@ public class AiChatService {
                 return Map.of("response", fallbackResponse, "intent", "", "tool_used", "");
             }
 
-            JSONObject result = JSONUtil.parseObj(response.body());
+            String responseBody = response.body();
+            log.info("AI服务响应体长度: {}", responseBody.length());
+            log.info("AI服务响应体前200字符: {}", responseBody.length() > 200 ? responseBody.substring(0, 200) : responseBody);
+            
+            JSONObject result = JSONUtil.parseObj(responseBody);
+            log.info("解析JSON成功, keys: {}", result.keySet());
+            
             String aiResponse = result.getStr("response", "抱歉，我无法处理您的请求。");
             String intent = result.getStr("intent");
             String toolUsed = result.getStr("tool_used");
+            
+            log.info("AI回复长度: {}", aiResponse != null ? aiResponse.length() : 0);
 
             chatHistoryService.saveMessage(userId, sessionId, "assistant", aiResponse, intent, toolUsed);
 

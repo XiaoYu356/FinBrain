@@ -1,6 +1,7 @@
 package com.finbrain.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.finbrain.entity.ChatHistory;
 import com.finbrain.mapper.ChatHistoryMapper;
@@ -29,7 +30,13 @@ public class ChatHistoryServiceImpl implements ChatHistoryService {
         history.setRole(role);
         history.setContent(content);
         history.setIntent(intent);
-        history.setToolCalls(toolCalls);
+        if (toolCalls != null && !toolCalls.isEmpty()) {
+            if (toolCalls.trim().startsWith("[") || toolCalls.trim().startsWith("{")) {
+                history.setToolCalls(toolCalls);
+            } else {
+                history.setToolCalls(JSONUtil.createArray().put(toolCalls).toString());
+            }
+        }
         history.setCreateTime(LocalDateTime.now());
         chatHistoryMapper.insert(history);
     }
