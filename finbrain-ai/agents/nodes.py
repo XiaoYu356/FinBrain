@@ -64,7 +64,19 @@ INTENT_PATTERNS = {
         r"理财.*知识",
         r"投资.*建议",
         r"什么是.*理财",
-        r"如何.*投资"
+        r"如何.*投资",
+        r"解释.*",
+        r"什么是.*",
+        r"介绍一下",
+        r"帮我了解",
+        r"想知道.*",
+        r"请问.*",
+        r"知识.*问答",
+        r"文档.*内容",
+        r"资料.*查询",
+        r"学习.*计划",
+        r"聚合.*搜索",
+        r"搜索.*平台"
     ]
 }
 
@@ -83,7 +95,7 @@ def detect_intent(state: AgentState) -> Dict[str, Any]:
 def route_intent(state: AgentState) -> str:
     intent = state.get("intent", "chat")
     
-    if intent in ["search_product", "calculate_income", "get_asset", "create_order", "query_orders", "risk_assessment"]:
+    if intent in ["search_product", "calculate_income", "get_asset", "create_order", "query_orders"]:
         return "tool"
     elif intent == "rag_query":
         return "rag"

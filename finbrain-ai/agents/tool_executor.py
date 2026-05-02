@@ -40,9 +40,6 @@ async def execute_tool(state: AgentState) -> Dict[str, Any]:
         
         elif intent == "query_orders":
             tool_result = await query_orders(user_id)
-        
-        elif intent == "risk_assessment":
-            tool_result = {"success": True, "message": "请前往风险测评页面完成测评"}
     
     except Exception as e:
         tool_result = {"success": False, "message": str(e)}

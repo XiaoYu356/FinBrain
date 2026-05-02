@@ -179,3 +179,23 @@ INSERT INTO `transaction` (`transaction_no`, `user_id`, `order_id`, `type`, `amo
 -- 插入测试风险测评记录
 INSERT INTO `risk_assessment` (`user_id`, `score`, `risk_level`, `answers`) VALUES
 (1, 65, 'C3', '[{"question": "您的年龄范围是？", "answer": "30-40岁"}, {"question": "您的投资经验如何？", "answer": "3-5年"}, {"question": "您能接受的最大亏损比例是？", "answer": "10%-20%"}]');
+
+-- 知识库文档表
+CREATE TABLE IF NOT EXISTS `knowledge_document` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '文档ID',
+    `file_name` VARCHAR(255) NOT NULL COMMENT '存储文件名',
+    `original_name` VARCHAR(255) NOT NULL COMMENT '原始文件名',
+    `file_type` VARCHAR(50) NOT NULL COMMENT '文件类型',
+    `file_size` BIGINT NOT NULL COMMENT '文件大小(字节)',
+    `object_name` VARCHAR(500) NOT NULL COMMENT 'MinIO对象名',
+    `bucket_name` VARCHAR(100) NOT NULL COMMENT 'MinIO桶名',
+    `status` VARCHAR(20) DEFAULT 'pending' COMMENT '状态(pending/processing/completed/failed)',
+    `chunk_count` INT DEFAULT 0 COMMENT '切块数量',
+    `error_message` TEXT COMMENT '错误信息',
+    `created_by` BIGINT NOT NULL COMMENT '创建人ID',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `process_time` DATETIME DEFAULT NULL COMMENT '处理完成时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_created_by` (`created_by`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='知识库文档表';

@@ -3,6 +3,7 @@ package com.finbrain.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.finbrain.entity.ChatSession;
 import com.finbrain.mapper.ChatSessionMapper;
+import com.finbrain.service.AiChatService;
 import com.finbrain.service.AuthService;
 import com.finbrain.service.ChatHistoryService;
 import com.finbrain.utils.Result;
@@ -23,6 +24,7 @@ public class ChatHistoryController {
     private final ChatHistoryService chatHistoryService;
     private final AuthService authService;
     private final ChatSessionMapper chatSessionMapper;
+    private final AiChatService aiChatService;
 
     @Operation(summary = "获取会话列表")
     @GetMapping("/sessions")
@@ -61,12 +63,16 @@ public class ChatHistoryController {
     @DeleteMapping("/sessions/{sessionId}")
     public Result<Void> deleteSession(@PathVariable String sessionId) {
         Long userId = authService.getCurrentUser().getId();
+        
         chatSessionMapper.delete(
                 new LambdaQueryWrapper<ChatSession>()
                         .eq(ChatSession::getSessionId, sessionId)
                         .eq(ChatSession::getUserId, userId)
         );
         chatHistoryService.deleteBySessionId(userId, sessionId);
+        
+        aiChatService.deleteSessionMemory(userId, sessionId);
+        
         return Result.success();
     }
 

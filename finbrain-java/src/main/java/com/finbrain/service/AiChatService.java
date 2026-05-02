@@ -21,7 +21,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AiChatService {
 
-    private final ChatHistoryService chatHistoryService;
     private final AuthService authService;
     private final ChatSessionMapper chatSessionMapper;
 
@@ -33,8 +32,6 @@ public class AiChatService {
         Long userId = user.getId();
 
         ensureSession(userId, sessionId, message);
-
-        chatHistoryService.saveMessage(userId, sessionId, "user", message, null, null);
 
         String url = aiServiceUrl + "/chat";
         JSONObject requestBody = new JSONObject();
@@ -57,7 +54,6 @@ public class AiChatService {
             if (!response.isOk()) {
                 log.error("AI 服务请求失败, status={}, body={}", response.getStatus(), response.body());
                 String fallbackResponse = "抱歉，AI服务暂时不可用，请稍后再试。";
-                chatHistoryService.saveMessage(userId, sessionId, "assistant", fallbackResponse, null, null);
                 return Map.of("response", fallbackResponse, "intent", "", "tool_used", "");
             }
 
@@ -74,8 +70,6 @@ public class AiChatService {
             
             log.info("AI回复长度: {}", aiResponse != null ? aiResponse.length() : 0);
 
-            chatHistoryService.saveMessage(userId, sessionId, "assistant", aiResponse, intent, toolUsed);
-
             return Map.of(
                     "response", aiResponse,
                     "intent", intent != null ? intent : "",
@@ -84,7 +78,6 @@ public class AiChatService {
         } catch (Exception e) {
             log.error("调用AI服务异常: {}", e.getMessage(), e);
             String fallbackResponse = "抱歉，AI服务暂时不可用，请稍后再试。";
-            chatHistoryService.saveMessage(userId, sessionId, "assistant", fallbackResponse, null, null);
             return Map.of("response", fallbackResponse, "intent", "", "tool_used", "");
         }
     }
@@ -111,6 +104,25 @@ public class AiChatService {
         } else {
             existing.setUpdateTime(LocalDateTime.now());
             chatSessionMapper.updateById(existing);
+        }
+    }
+
+    public void deleteSessionMemory(Long userId, String sessionId) {
+        try {
+            String url = aiServiceUrl + "/session?user_id=" + userId + "&session_id=" + sessionId;
+            log.info("调用AI服务删除会话记忆: url={}", url);
+            
+            HttpResponse response = HttpRequest.delete(url)
+                    .timeout(10000)
+                    .execute();
+            
+            if (response.isOk()) {
+                log.info("AI服务会话记忆删除成功: sessionId={}", sessionId);
+            } else {
+                log.warn("AI服务会话记忆删除失败: status={}", response.getStatus());
+            }
+        } catch (Exception e) {
+            log.error("调用AI服务删除会话记忆异常: {}", e.getMessage());
         }
     }
 }

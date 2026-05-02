@@ -98,3 +98,46 @@ class FinBrainClient:
             params={"userId": user_id},
             json_data={"answers": answers}
         )
+    
+    async def get_chat_history(self, user_id: int, session_id: str) -> Dict[str, Any]:
+        return await self._request(
+            "GET",
+            f"/ai-tools/chat-history/{session_id}",
+            params={"userId": user_id}
+        )
+    
+    async def save_chat_message(
+        self,
+        user_id: int,
+        session_id: str,
+        role: str,
+        content: str
+    ) -> Dict[str, Any]:
+        json_data = {
+            "userId": user_id,
+            "sessionId": session_id,
+            "role": role,
+            "content": content
+        }
+        return await self._request(
+            "POST",
+            "/ai-tools/chat-message",
+            json_data=json_data
+        )
+    
+    async def save_chat_messages(
+        self,
+        user_id: int,
+        session_id: str,
+        messages: list
+    ) -> Dict[str, Any]:
+        json_data = {
+            "userId": user_id,
+            "sessionId": session_id,
+            "messages": messages
+        }
+        return await self._request(
+            "POST",
+            "/ai-tools/chat-messages",
+            json_data=json_data
+        )

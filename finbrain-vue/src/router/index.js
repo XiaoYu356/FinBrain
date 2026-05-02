@@ -101,6 +101,12 @@ const routes = [
         meta: { requiresAuth: true, requiresAdmin: true, title: '资产管理' }
       },
       {
+        path: 'knowledge',
+        name: 'AdminKnowledge',
+        component: () => import('@/views/admin/AdminKnowledge.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true, title: '知识库管理' }
+      },
+      {
         path: 'profile',
         name: 'AdminProfile',
         component: () => import('@/views/admin/AdminProfile.vue'),

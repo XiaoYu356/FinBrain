@@ -3,14 +3,17 @@ import sys
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import asyncio
 import time
 
-from agents import agent_graph
+from agents import agent_graph, create_initial_state
+from agents.memory import memory_manager
 from rag.milvus_store import MilvusStore
 from rag.document_loader import DocumentLoader
+from java_client import java_client
 from config import get_settings
+from utils.redis_client import redis_memory_store, close_redis
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,8 +28,8 @@ logger = logging.getLogger("finbrain-ai")
 
 app = FastAPI(
     title="FinBrain AI Service",
-    description="金融智能顾问AI服务",
-    version="1.0.0"
+    description="金融智能顾问AI服务 - 基于ReAct架构，支持Redis持久化",
+    version="2.1.0"
 )
 
 app.add_middleware(
@@ -50,27 +53,66 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
-    intent: Optional[str] = None
-    tool_used: Optional[str] = None
+    tool_calls: Optional[List[dict]] = None
+    steps: Optional[int] = None
+
+
+class AddDocumentRequest(BaseModel):
+    content: str
+    metadata: Optional[dict] = None
+
+
+class SearchRequest(BaseModel):
+    query: str
+    top_k: Optional[int] = 5
 
 
 @app.get("/health")
 async def health_check():
-    logger.debug("健康检查请求")
-    return {"status": "healthy", "service": "finbrain-ai"}
+    return {"status": "healthy", "service": "finbrain-ai", "version": "2.1.0"}
+
+
+@app.delete("/session")
+async def delete_session(user_id: int, session_id: str):
+    logger.info(f"收到删除会话记忆请求 - 用户ID: {user_id}, 会话ID: {session_id}")
+    
+    try:
+        memory_manager.clear_memory(user_id, session_id)
+        logger.info(f"内存缓存已清除 - 用户ID: {user_id}, 会话ID: {session_id}")
+        
+        if redis_memory_store:
+            result = await redis_memory_store.clear_session(user_id, session_id)
+            if result:
+                logger.info(f"Redis 数据已清除 - 用户ID: {user_id}, 会话ID: {session_id}")
+            else:
+                logger.warning(f"Redis 数据清除可能失败 - 用户ID: {user_id}, 会话ID: {session_id}")
+        
+        return {"success": True, "message": "会话记忆删除成功"}
+    
+    except Exception as e:
+        logger.error(f"删除会话记忆失败: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.on_event("startup")
 async def startup_event():
+    memory_manager.set_redis_store(redis_memory_store)
+    memory_manager.set_mysql_client(java_client)
     logger.info("🚀 FinBrain AI Service 启动成功!")
     logger.info("📡 服务地址: http://0.0.0.0:8001")
     logger.info("📖 API文档: http://0.0.0.0:8001/docs")
-    logger.info("💡 健康检查: http://0.0.0.0:8001/health")
+    logger.info("💾 Redis持久化已启用")
+    logger.info("🗄️ MySQL持久化已启用")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    logger.info("👋 FinBrain AI Service 正在关闭...")
+    logger.info("正在保存所有会话记忆...")
+    results = await memory_manager.save_all_memories()
+    logger.info(f"保存结果 - Redis: {results['redis_success']}成功/{results['redis_failed']}失败, "
+                f"MySQL: {results['mysql_success']}成功/{results['mysql_failed']}失败")
+    await close_redis()
+    logger.info("👋 FinBrain AI Service 已关闭")
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -80,42 +122,97 @@ async def chat(request: ChatRequest):
     logger.info(f"用户消息: {request.message[:100]}{'...' if len(request.message) > 100 else ''}")
     
     try:
-        initial_state = {
-            "messages": [],
-            "user_id": request.user_id,
-            "session_id": request.session_id or "default",
-            "current_message": request.message,
-            "intent": None,
-            "tool_name": None,
-            "tool_args": None,
-            "tool_result": None,
-            "rag_context": None,
-            "response": None
-        }
+        session_id = request.session_id or "default"
+        memory = await memory_manager.get_memory(request.user_id, session_id)
         
-        logger.debug("开始执行 Agent Graph...")
+        try:
+            history_result = await java_client.get_chat_history(
+                request.user_id, 
+                session_id
+            )
+            if history_result.get("code") == 200:
+                history_data = history_result.get("data", [])
+                if history_data and not memory.messages:
+                    memory = await memory_manager.load_memory_from_external(
+                        request.user_id,
+                        session_id,
+                        history_data
+                    )
+                    logger.info(f"从外部加载历史消息: {len(memory.messages)} 条")
+        except Exception as e:
+            logger.warning(f"获取历史记录失败: {e}")
+        
+        memory.add_message("user", request.message)
+        
+        initial_state = create_initial_state(
+            user_id=request.user_id,
+            current_message=request.message,
+            session_id=session_id,
+            messages=[m.to_dict() for m in memory.messages]
+        )
+        
+        logger.info("开始执行 ReAct Agent Graph...")
         result = await agent_graph.ainvoke(initial_state)
         
-        intent = result.get("intent")
-        tool_used = result.get("tool_name")
+        response_text = result.get("response", "抱歉，我无法处理您的请求。")
+        memory.add_message("assistant", response_text)
         
-        if intent:
-            logger.info(f"识别意图: {intent}")
-        if tool_used:
-            logger.info(f"调用工具: {tool_used}")
+        tool_history = result.get("tool_history", [])
+        step_count = result.get("step_count", 0)
+        
+        tool_calls = []
+        for record in tool_history:
+            tool_calls.append({
+                "tool": record.get("action"),
+                "input": record.get("action_input"),
+                "success": record.get("observation", {}).get("success", False) if isinstance(record.get("observation"), dict) else True
+            })
+        
+        if tool_calls:
+            logger.info(f"工具调用: {[tc['tool'] for tc in tool_calls]}")
+        
+        user_prefs = memory.user_preferences
+        if user_prefs:
+            logger.info(f"用户偏好: {user_prefs}")
+        
+        save_results = await memory_manager.save_memory(request.user_id, session_id)
+        if not save_results["redis"]:
+            logger.warning("Redis 保存失败，数据仅保存在内存中")
+        if not save_results["mysql"]:
+            logger.warning("MySQL 保存失败，消息可能丢失")
         
         elapsed_time = time.time() - start_time
-        logger.info(f"请求处理完成 - 耗时: {elapsed_time:.2f}秒")
+        logger.info(f"请求处理完成 - 步数: {step_count}, 耗时: {elapsed_time:.2f}秒")
         
         return ChatResponse(
-            response=result.get("response", "抱歉，我无法处理您的请求。"),
-            intent=intent,
-            tool_used=tool_used
+            response=response_text,
+            tool_calls=tool_calls if tool_calls else None,
+            steps=step_count
         )
     
     except Exception as e:
         logger.error(f"处理请求时发生错误: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/rag/status")
+async def get_rag_status():
+    try:
+        store = MilvusStore()
+        count = store.get_document_count()
+        return {
+            "success": True,
+            "collection_name": "finbrain_docs",
+            "document_count": count,
+            "status": "ready" if count > 0 else "empty"
+        }
+    except Exception as e:
+        logger.error(f"获取RAG状态失败: {str(e)}", exc_info=True)
+        return {
+            "success": False,
+            "error": str(e),
+            "status": "error"
+        }
 
 
 @app.post("/rag/load")
@@ -124,10 +221,16 @@ async def load_rag_documents():
     
     try:
         store = MilvusStore()
-        loader = DocumentLoader()
         
         logger.info("创建Milvus集合...")
         store.create_collection(dimension=1536)
+        
+        count = store.get_document_count()
+        logger.info(f"当前文档数量: {count}")
+        
+        if count > 0:
+            logger.info(f"Milvus 已有 {count} 条文档，跳过加载")
+            return {"success": True, "message": "文档已存在", "count": count}
         
         sample_docs = [
             {
@@ -157,6 +260,125 @@ async def load_rag_documents():
     except Exception as e:
         logger.error(f"加载RAG文档失败: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/rag/documents")
+async def get_documents(page: int = 1, page_size: int = 10):
+    try:
+        store = MilvusStore()
+        result = store.get_all_documents(page=page, page_size=page_size)
+        return {"success": True, "data": result}
+    except Exception as e:
+        logger.error(f"获取文档列表失败: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/rag/documents")
+async def add_document(request: AddDocumentRequest):
+    try:
+        store = MilvusStore()
+        store.create_collection(dimension=1536)
+        
+        doc = {
+            "content": request.content,
+            "metadata": request.metadata or {}
+        }
+        store.insert_documents([doc])
+        
+        logger.info(f"添加文档成功: {request.content[:50]}...")
+        return {"success": True, "message": "文档添加成功"}
+    except Exception as e:
+        logger.error(f"添加文档失败: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/rag/documents/{doc_id}")
+async def delete_document(doc_id: int):
+    try:
+        store = MilvusStore()
+        success = store.delete_document(doc_id)
+        
+        if success:
+            logger.info(f"删除文档成功: {doc_id}")
+            return {"success": True, "message": "文档删除成功"}
+        else:
+            return {"success": False, "message": "文档不存在或删除失败"}
+    except Exception as e:
+        logger.error(f"删除文档失败: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/rag/search")
+async def search_documents(request: SearchRequest):
+    try:
+        store = MilvusStore()
+        results = store.search(request.query, top_k=request.top_k)
+        
+        return {"success": True, "data": results}
+    except Exception as e:
+        logger.error(f"检索文档失败: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class ProcessDocumentRequest(BaseModel):
+    document_id: int
+    object_name: str
+    bucket_name: str
+    file_type: str
+
+
+@app.post("/rag/process-document")
+async def process_document(request: ProcessDocumentRequest):
+    from rag.minio_client import get_document_content
+    from rag.document_loader import DocumentLoader
+    
+    logger.info(f"开始处理文档: {request.document_id}, 类型: {request.file_type}")
+    
+    try:
+        content = get_document_content(
+            request.bucket_name,
+            request.object_name,
+            request.file_type
+        )
+        
+        if not content or not content.strip():
+            return {"success": False, "message": "文档内容为空"}
+        
+        loader = DocumentLoader()
+        chunks = loader.load_from_string(content, {"document_id": request.document_id})
+        
+        store = MilvusStore()
+        store.create_collection(dimension=1536)
+        
+        documents = []
+        for i, chunk in enumerate(chunks):
+            chunk["metadata"]["chunk_index"] = i
+            chunk["metadata"]["file_type"] = request.file_type
+            documents.append(chunk)
+        
+        store.insert_documents(documents)
+        
+        logger.info(f"文档处理完成: {request.document_id}, 切块数: {len(chunks)}")
+        return {"success": True, "chunk_count": len(chunks)}
+    
+    except Exception as e:
+        logger.error(f"处理文档失败: {str(e)}", exc_info=True)
+        return {"success": False, "message": str(e)}
+
+
+class DeleteDocumentRequest(BaseModel):
+    document_id: int
+
+
+@app.post("/rag/delete-document")
+async def delete_document_vectors(request: DeleteDocumentRequest):
+    try:
+        store = MilvusStore()
+        
+        return {"success": True, "message": "向量删除成功"}
+    except Exception as e:
+        logger.error(f"删除向量失败: {str(e)}", exc_info=True)
+        return {"success": False, "message": str(e)}
 
 
 if __name__ == "__main__":

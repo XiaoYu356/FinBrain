@@ -91,3 +91,33 @@ export function getStatistics() {
     method: 'get'
   })
 }
+
+export function getKnowledgeDocuments(params) {
+  return request({
+    url: '/admin/knowledge/documents',
+    method: 'get',
+    params
+  })
+}
+
+export function addKnowledgeDocument(data) {
+  return request({
+    url: '/admin/knowledge/documents',
+    method: 'post',
+    data
+  })
+}
+
+export function deleteKnowledgeDocument(id) {
+  return request({
+    url: `/admin/knowledge/documents/${id}`,
+    method: 'delete'
+  })
+}
+
+export function reprocessDocument(id) {
+  return request({
+    url: `/admin/knowledge/documents/${id}/process`,
+    method: 'post'
+  })
+}

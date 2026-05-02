@@ -1,32 +1,29 @@
 from langgraph.graph import StateGraph, END
 from agents.state import AgentState
-from agents.nodes import detect_intent, route_intent
-from agents.tool_executor import execute_tool
-from agents.response_generator import rag_search, generate_response
+from agents.react_agent import (
+    think, act, should_continue, generate_final_response
+)
 
 
 def create_agent_graph():
     workflow = StateGraph(AgentState)
     
-    workflow.add_node("detect_intent", detect_intent)
-    workflow.add_node("execute_tool", execute_tool)
-    workflow.add_node("rag_search", rag_search)
-    workflow.add_node("generate_response", generate_response)
+    workflow.add_node("think", think)
+    workflow.add_node("act", act)
+    workflow.add_node("generate_response", generate_final_response)
     
-    workflow.set_entry_point("detect_intent")
+    workflow.set_entry_point("think")
     
     workflow.add_conditional_edges(
-        "detect_intent",
-        route_intent,
+        "think",
+        should_continue,
         {
-            "tool": "execute_tool",
-            "rag": "rag_search",
-            "chat": "generate_response"
+            "continue": "act",
+            "end": "generate_response"
         }
     )
     
-    workflow.add_edge("execute_tool", "generate_response")
-    workflow.add_edge("rag_search", "generate_response")
+    workflow.add_edge("act", "think")
     workflow.add_edge("generate_response", END)
     
     return workflow.compile()

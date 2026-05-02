@@ -32,6 +32,10 @@
           <el-icon><Wallet /></el-icon>
           <span>资产管理</span>
         </el-menu-item>
+        <el-menu-item index="/admin/knowledge">
+          <el-icon><Collection /></el-icon>
+          <span>知识库管理</span>
+        </el-menu-item>
         <el-menu-item index="/admin/profile">
           <el-icon><Setting /></el-icon>
           <span>个人中心</span>
