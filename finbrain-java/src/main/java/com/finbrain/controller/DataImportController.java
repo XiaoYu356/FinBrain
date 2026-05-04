@@ -1,8 +1,10 @@
 package com.finbrain.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.finbrain.annotation.RequireAdmin;
 import com.finbrain.entity.DataImportLog;
+import com.finbrain.handler.SentinelBlockHandler;
 import com.finbrain.service.DataImportService;
 import com.finbrain.utils.Result;
 import com.finbrain.vo.ImportResultVO;
@@ -28,6 +30,7 @@ public class DataImportController {
     @Operation(summary = "导入产品数据")
     @PostMapping("/products")
     @RequireAdmin
+    @SentinelResource(value = "data:import:products", blockHandler = "importProductsBlockHandler", blockHandlerClass = SentinelBlockHandler.class)
     public Result<ImportResultVO> importProducts(@RequestParam("file") MultipartFile file) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long currentUserId = Long.parseLong((String) authentication.getPrincipal());
@@ -47,6 +50,7 @@ public class DataImportController {
     @Operation(summary = "导入净值数据")
     @PostMapping("/nav")
     @RequireAdmin
+    @SentinelResource(value = "data:import:nav", blockHandler = "importNavBlockHandler", blockHandlerClass = SentinelBlockHandler.class)
     public Result<ImportResultVO> importNavData(@RequestParam("file") MultipartFile file) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long currentUserId = Long.parseLong((String) authentication.getPrincipal());

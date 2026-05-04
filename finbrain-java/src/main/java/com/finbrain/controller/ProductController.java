@@ -1,5 +1,6 @@
 package com.finbrain.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.finbrain.dto.ProductSearchDTO;
 import com.finbrain.service.ProductService;
@@ -20,18 +21,21 @@ public class ProductController {
 
     @Operation(summary = "搜索产品列表")
     @PostMapping("/search")
+    @SentinelResource(value = "product:search")
     public Result<Page<ProductVO>> searchProducts(@RequestBody ProductSearchDTO dto) {
         return Result.success(productService.searchProducts(dto));
     }
 
     @Operation(summary = "获取产品详情")
     @GetMapping("/{id}")
+    @SentinelResource(value = "product:detail")
     public Result<ProductVO> getProductById(@PathVariable Long id) {
         return Result.success(productService.getProductById(id));
     }
 
     @Operation(summary = "获取在售产品列表")
     @GetMapping("/list")
+    @SentinelResource(value = "product:list")
     public Result<Page<ProductVO>> getProductList(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {

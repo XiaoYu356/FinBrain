@@ -1,9 +1,11 @@
 package com.finbrain.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.finbrain.dto.ChangePasswordDTO;
 import com.finbrain.dto.LoginDTO;
 import com.finbrain.dto.RegisterDTO;
 import com.finbrain.dto.UpdateProfileDTO;
+import com.finbrain.handler.SentinelBlockHandler;
 import com.finbrain.service.AuthService;
 import com.finbrain.utils.Result;
 import com.finbrain.vo.UserVO;
@@ -25,12 +27,14 @@ public class AuthController {
 
     @Operation(summary = "用户登录")
     @PostMapping("/login")
+    @SentinelResource(value = "auth:login", blockHandler = "loginBlockHandler", blockHandlerClass = SentinelBlockHandler.class)
     public Result<Map<String, Object>> login(@Valid @RequestBody LoginDTO dto) {
         return Result.success(authService.login(dto));
     }
 
     @Operation(summary = "用户注册")
     @PostMapping("/register")
+    @SentinelResource(value = "auth:register", blockHandler = "registerBlockHandler", blockHandlerClass = SentinelBlockHandler.class)
     public Result<Void> register(@Valid @RequestBody RegisterDTO dto) {
         authService.register(dto);
         return Result.success();
@@ -38,6 +42,7 @@ public class AuthController {
 
     @Operation(summary = "刷新Token")
     @PostMapping("/refresh")
+    @SentinelResource(value = "auth:refresh", blockHandler = "refreshTokenBlockHandler", blockHandlerClass = SentinelBlockHandler.class)
     public Result<Map<String, Object>> refreshToken(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
@@ -57,6 +62,7 @@ public class AuthController {
 
     @Operation(summary = "获取当前用户信息")
     @GetMapping("/info")
+    @SentinelResource(value = "auth:info")
     public Result<UserVO> getCurrentUserInfo() {
         return Result.success(authService.getCurrentUserInfo());
     }

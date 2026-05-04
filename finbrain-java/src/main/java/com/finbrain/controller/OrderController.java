@@ -1,8 +1,10 @@
 package com.finbrain.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.finbrain.dto.OrderDTO;
 import com.finbrain.enums.OrderStatus;
+import com.finbrain.handler.SentinelBlockHandler;
 import com.finbrain.service.AuthService;
 import com.finbrain.service.OrderService;
 import com.finbrain.service.OrderStateMachineService;
@@ -29,6 +31,7 @@ public class OrderController {
 
     @Operation(summary = "创建订单")
     @PostMapping("/create")
+    @SentinelResource(value = "order:create", blockHandler = "createOrderBlockHandler", blockHandlerClass = SentinelBlockHandler.class)
     public Result<OrderVO> createOrder(@Valid @RequestBody OrderDTO dto) {
         Long userId = authService.getCurrentUser().getId();
         return Result.success(orderStateMachineService.createOrder(userId, dto));
@@ -36,6 +39,7 @@ public class OrderController {
 
     @Operation(summary = "取消订单")
     @PostMapping("/cancel/{orderId}")
+    @SentinelResource(value = "order:cancel", blockHandler = "cancelOrderBlockHandler", blockHandlerClass = SentinelBlockHandler.class)
     public Result<Void> cancelOrder(@PathVariable Long orderId, @RequestParam(required = false) String reason) {
         Long userId = authService.getCurrentUser().getId();
         orderStateMachineService.cancelOrder(userId, orderId, reason);
@@ -44,6 +48,7 @@ public class OrderController {
 
     @Operation(summary = "赎回订单")
     @PostMapping("/redeem/{orderId}")
+    @SentinelResource(value = "order:redeem", blockHandler = "redeemOrderBlockHandler", blockHandlerClass = SentinelBlockHandler.class)
     public Result<Void> redeemOrder(@PathVariable Long orderId) {
         Long userId = authService.getCurrentUser().getId();
         orderStateMachineService.redeemOrder(userId, orderId);
@@ -52,6 +57,7 @@ public class OrderController {
 
     @Operation(summary = "获取订单列表")
     @GetMapping("/list")
+    @SentinelResource(value = "order:list")
     public Result<Page<OrderVO>> getOrders(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,

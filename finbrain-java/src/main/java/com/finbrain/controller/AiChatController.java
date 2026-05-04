@@ -1,5 +1,7 @@
 package com.finbrain.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.finbrain.handler.SentinelBlockHandler;
 import com.finbrain.service.AiChatService;
 import com.finbrain.utils.Result;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +21,7 @@ public class AiChatController {
 
     @Operation(summary = "发送聊天消息")
     @PostMapping("/chat")
+    @SentinelResource(value = "ai:chat", blockHandler = "chatBlockHandler", blockHandlerClass = SentinelBlockHandler.class)
     public Result<Map<String, Object>> chat(@RequestBody Map<String, String> request) {
         String message = request.get("message");
         String sessionId = request.get("sessionId");

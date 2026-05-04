@@ -22,6 +22,18 @@ ai:
   service:
     url: ${AI_SERVICE_URL:http://localhost:8001}
 
+sentinel:
+  transport:
+    dashboard: ${SENTINEL_DASHBOARD:localhost:8080}
+    port: ${SENTINEL_PORT:8719}
+  eager: true
+  web-context-unify: false
+  filter:
+    enabled: true
+    url-patterns: /**
+  log:
+    switch-pid: false
+
 logging:
   level:
     root: INFO

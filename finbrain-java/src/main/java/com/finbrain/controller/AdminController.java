@@ -1,6 +1,7 @@
 package com.finbrain.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.finbrain.annotation.RequireAdmin;
 import com.finbrain.dto.AdminProductDTO;
@@ -248,6 +249,7 @@ public class AdminController {
     @Operation(summary = "获取统计数据")
     @GetMapping("/statistics")
     @RequireAdmin
+    @SentinelResource(value = "admin:statistics")
     public Result<StatisticsVO> getStatistics() {
         return Result.success(adminService.getStatistics());
     }

@@ -1,5 +1,6 @@
 package com.finbrain.controller.ai;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.finbrain.dto.IncomeCalculateDTO;
 import com.finbrain.dto.OrderDTO;
@@ -41,6 +42,7 @@ public class AiToolController {
 
     @Operation(summary = "搜索理财产品")
     @PostMapping("/search-products")
+    @SentinelResource(value = "ai-tools:search-products")
     public Result<List<Map<String, Object>>> searchProducts(
             @RequestParam(required = false) String productType,
             @RequestParam(required = false) Double minRate,
@@ -104,6 +106,7 @@ public class AiToolController {
 
     @Operation(summary = "获取用户资产")
     @GetMapping("/user-asset/{userId}")
+    @SentinelResource(value = "ai-tools:user-asset")
     public Result<Map<String, Object>> getUserAsset(@PathVariable Long userId) {
         AssetVO asset = accountService.getAssetInfo(userId);
         
@@ -119,6 +122,7 @@ public class AiToolController {
 
     @Operation(summary = "创建订单")
     @PostMapping("/create-order")
+    @SentinelResource(value = "ai-tools:create-order")
     public Result<Map<String, Object>> createOrder(
             @RequestParam Long userId,
             @RequestParam Long productId,
@@ -150,6 +154,7 @@ public class AiToolController {
 
     @Operation(summary = "查询用户订单")
     @GetMapping("/orders/{userId}")
+    @SentinelResource(value = "ai-tools:orders")
     public Result<List<Map<String, Object>>> getOrders(@PathVariable Long userId) {
         Page<OrderVO> orderPage = orderService.getOrders(userId, 1, 100);
         
@@ -172,6 +177,7 @@ public class AiToolController {
 
     @Operation(summary = "提交风险测评")
     @PostMapping("/risk-assessment")
+    @SentinelResource(value = "ai-tools:risk-assessment")
     public Result<Map<String, Object>> submitRiskAssessment(
             @RequestParam Long userId,
             @RequestBody RiskDTO dto) {
