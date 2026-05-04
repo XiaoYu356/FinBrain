@@ -2,11 +2,16 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-COPY target/finbrain-java-1.0.0.jar app.jar
+RUN addgroup -S finbrain && adduser -S finbrain -G finbrain
+
+COPY target/*.jar app.jar
+
+RUN chown -R finbrain:finbrain /app
+
+USER finbrain
 
 EXPOSE 8080
 
-ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC"
 
-ENTRYPOINT ["java", "-jar", "-Xms512m", "-Xmx1024m", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

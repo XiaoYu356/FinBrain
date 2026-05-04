@@ -1,7 +1,7 @@
 from .product_tools import search_products, calculate_income
 from .asset_tools import get_user_asset
 from .order_tools import create_order, query_orders
-from .risk_tools import submit_risk_assessment
+from .risk_tools import submit_risk_assessment, get_user_risk_level
 from .tool_definitions import (
     TOOL_DEFINITIONS,
     ToolDefinition,
@@ -18,6 +18,7 @@ __all__ = [
     "create_order",
     "query_orders",
     "submit_risk_assessment",
+    "get_user_risk_level",
     "TOOL_DEFINITIONS",
     "ToolDefinition",
     "ToolParameter",

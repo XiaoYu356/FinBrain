@@ -11,6 +11,8 @@
               <el-option label="已确认" :value="1" />
               <el-option label="已取消" :value="2" />
               <el-option label="已赎回" :value="3" />
+              <el-option label="已到期" :value="4" />
+              <el-option label="已结算" :value="5" />
             </el-select>
             <el-button type="primary" @click="fetchOrders">搜索</el-button>
           </div>
@@ -28,7 +30,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="90">
           <template #default="{ row }">
-            <el-tag :type="getStatusTagType(row.status)">{{ row.statusText }}</el-tag>
+            <el-tag :type="getOrderStatusTagType(row.status)">{{ row.statusText }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="orderTime" label="下单时间" width="170">
@@ -36,9 +38,15 @@
             {{ formatTime(row.orderTime) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="80">
+        <el-table-column label="操作" width="140">
           <template #default="{ row }">
             <el-button size="small" @click="handleView(row)">详情</el-button>
+            <el-button 
+              v-if="row.status === 0" 
+              size="small" 
+              type="primary" 
+              @click="handleConfirm(row)"
+            >确认</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -62,11 +70,16 @@
         <el-descriptions-item label="产品代码">{{ currentOrder.productCode }}</el-descriptions-item>
         <el-descriptions-item label="金额">{{ formatMoney(currentOrder.amount) }}</el-descriptions-item>
         <el-descriptions-item label="份额">{{ currentOrder.shares }}</el-descriptions-item>
+        <el-descriptions-item label="年化收益率">{{ currentOrder.annualReturnRate }}%</el-descriptions-item>
+        <el-descriptions-item label="期限">{{ currentOrder.termDays }}天</el-descriptions-item>
+        <el-descriptions-item label="预计收益">{{ formatMoney(currentOrder.expectedIncome) }}</el-descriptions-item>
+        <el-descriptions-item label="实际收益">{{ formatMoney(currentOrder.actualIncome) }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="getStatusTagType(currentOrder.status)">{{ currentOrder.statusText }}</el-tag>
+          <el-tag :type="getOrderStatusTagType(currentOrder.status)">{{ currentOrder.statusText }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="下单时间">{{ formatTime(currentOrder.orderTime) }}</el-descriptions-item>
-        <el-descriptions-item label="确认时间">{{ formatTime(currentOrder.successTime) }}</el-descriptions-item>
+        <el-descriptions-item label="确认时间">{{ formatTime(currentOrder.confirmTime) }}</el-descriptions-item>
+        <el-descriptions-item label="到期日期">{{ currentOrder.maturityDate }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
@@ -74,7 +87,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getAdminOrderList, getAdminOrderDetail } from '@/api/admin'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { getAdminOrderList, getAdminOrderDetail, confirmOrder } from '@/api/admin'
+import { formatMoney, formatTime, getOrderStatusTagType } from '@/utils/format'
 
 const loading = ref(false)
 const orders = ref([])
@@ -86,23 +101,8 @@ const filterStatus = ref(null)
 const dialogVisible = ref(false)
 const currentOrder = ref(null)
 
-const formatMoney = (value) => {
-  if (!value) return '¥0.00'
-  return '¥' + Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-const formatTime = (time) => {
-  if (!time) return '-'
-  return time.replace('T', ' ').substring(0, 19)
-}
-
 const indexMethod = (index) => {
   return (pageNum.value - 1) * pageSize.value + index + 1
-}
-
-const getStatusTagType = (status) => {
-  const types = { 0: 'warning', 1: 'success', 2: 'info', 3: 'danger' }
-  return types[status] || 'info'
 }
 
 const fetchOrders = async () => {
@@ -128,6 +128,28 @@ const handleView = async (row) => {
     dialogVisible.value = true
   } catch (e) {
     console.error(e)
+  }
+}
+
+const handleConfirm = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要确认订单 "${row.orderNo}" 吗？确认后将从用户冻结资金中扣除并开始计算收益。`,
+      '确认订单',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    await confirmOrder(row.id)
+    ElMessage.success('订单确认成功')
+    fetchOrders()
+  } catch (e) {
+    if (e !== 'cancel') {
+      console.error(e)
+      ElMessage.error(e.response?.data?.message || '订单确认失败')
+    }
   }
 }
 

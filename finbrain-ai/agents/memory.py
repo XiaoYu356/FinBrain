@@ -91,6 +91,7 @@ class ConversationMemory:
         self._redis_synced: bool = True
         self._mysql_synced: bool = True
         self._pending_mysql_messages: List[Message] = []
+        self._preferences_dirty: bool = False
     
     def add_message(self, role: str, content: str, metadata: dict = None):
         message = Message(
@@ -180,6 +181,7 @@ class ConversationMemory:
         self.user_preferences[key] = value
         self._dirty = True
         self._redis_synced = False
+        self._preferences_dirty = True
     
     def get_user_preference(self, key: str, default: Any = None) -> Any:
         return self.user_preferences.get(key, default)
@@ -275,16 +277,29 @@ class MemoryManager:
         if key not in self._memories:
             memory = ConversationMemory(user_id=user_id, session_id=session_id)
             
+            if self._mysql_client:
+                try:
+                    prefs_result = await self._mysql_client.get_user_preferences(user_id)
+                    if prefs_result.get("code") == 200:
+                        data = prefs_result.get("data", {})
+                        preferences = data.get("preferences", {})
+                        if preferences:
+                            memory.user_preferences = preferences
+                            logger.info(f"从 MySQL 加载用户偏好: user={user_id}, prefs={list(preferences.keys())}")
+                except Exception as e:
+                    logger.warning(f"从 MySQL 加载用户偏好失败: {e}")
+            
             if self._redis_store:
                 try:
                     redis_data = await self._redis_store.load_full_memory(user_id, session_id)
-                    if redis_data.get("messages") or redis_data.get("user_preferences"):
-                        memory = ConversationMemory.from_dict(
-                            redis_data,
-                            user_id=user_id,
-                            session_id=session_id
-                        )
-                        logger.info(f"从 Redis 加载记忆: user={user_id}, session={session_id}")
+                    if redis_data.get("messages"):
+                        memory.messages = [Message.from_dict(m) for m in redis_data.get("messages", [])]
+                        memory._mysql_synced = True
+                        logger.info(f"从 Redis 加载消息: user={user_id}, session={session_id}")
+                    if redis_data.get("tool_calls"):
+                        memory.tool_calls = [ToolCall.from_dict(t) for t in redis_data.get("tool_calls", [])]
+                    if redis_data.get("summary"):
+                        memory.summary = redis_data.get("summary")
                 except Exception as e:
                     logger.warning(f"从 Redis 加载记忆失败: {e}")
             
@@ -302,19 +317,24 @@ class MemoryManager:
         memory = self._memories.get(key)
         
         if not memory:
-            return {"redis": False, "mysql": False}
+            return {"redis": False, "mysql": False, "preferences": False}
         
         lock = self._get_lock(key)
         async with lock:
-            results = {"redis": True, "mysql": True}
+            results = {"redis": True, "mysql": True, "preferences": True}
             
             if memory._dirty or not memory._redis_synced:
                 if self._redis_store:
                     try:
+                        redis_data = {
+                            "messages": [m.to_dict() for m in memory.messages],
+                            "tool_calls": [t.to_dict() for t in memory.tool_calls],
+                            "summary": memory.summary
+                        }
                         await self._redis_store.save_full_memory(
                             user_id,
                             session_id,
-                            memory.to_dict()
+                            redis_data
                         )
                         memory.mark_redis_synced()
                         logger.debug(f"记忆已保存到 Redis: user={user_id}, session={session_id}")
@@ -339,13 +359,28 @@ class MemoryManager:
                         logger.error(f"保存消息到 MySQL 失败: {e}")
                         results["mysql"] = False
             
+            if memory._preferences_dirty and memory.user_preferences:
+                if self._mysql_client:
+                    try:
+                        prefs_to_save = {k: str(v) for k, v in memory.user_preferences.items()}
+                        await self._mysql_client.save_user_preferences(user_id, prefs_to_save)
+                        memory._preferences_dirty = False
+                        logger.info(f"用户偏好已保存到 MySQL: user={user_id}, prefs={list(memory.user_preferences.keys())}")
+                    except Exception as e:
+                        logger.error(f"保存用户偏好到 MySQL 失败: {e}")
+                        results["preferences"] = False
+            
             return results
     
     async def save_all_memories(self) -> Dict[str, int]:
-        results = {"redis_success": 0, "redis_failed": 0, "mysql_success": 0, "mysql_failed": 0}
+        results = {
+            "redis_success": 0, "redis_failed": 0, 
+            "mysql_success": 0, "mysql_failed": 0,
+            "preferences_success": 0, "preferences_failed": 0
+        }
         
         for key, memory in self._memories.items():
-            if memory._dirty or memory._pending_mysql_messages:
+            if memory._dirty or memory._pending_mysql_messages or memory._preferences_dirty:
                 parts = key.split("_", 1)
                 if len(parts) == 2:
                     user_id = int(parts[0])
@@ -361,6 +396,11 @@ class MemoryManager:
                         results["mysql_success"] += 1
                     else:
                         results["mysql_failed"] += 1
+                    
+                    if save_results.get("preferences", True):
+                        results["preferences_success"] += 1
+                    else:
+                        results["preferences_failed"] += 1
         
         return results
     

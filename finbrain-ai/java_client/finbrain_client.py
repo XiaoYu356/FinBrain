@@ -99,6 +99,9 @@ class FinBrainClient:
             json_data={"answers": answers}
         )
     
+    async def get_user_risk_level(self, user_id: int) -> Dict[str, Any]:
+        return await self._request("GET", f"/ai-tools/risk-level/{user_id}")
+    
     async def get_chat_history(self, user_id: int, session_id: str) -> Dict[str, Any]:
         return await self._request(
             "GET",
@@ -140,4 +143,18 @@ class FinBrainClient:
             "POST",
             "/ai-tools/chat-messages",
             json_data=json_data
+        )
+    
+    async def get_user_preferences(self, user_id: int) -> Dict[str, Any]:
+        return await self._request("GET", f"/ai-tools/user-preferences/{user_id}")
+    
+    async def save_user_preferences(
+        self, 
+        user_id: int, 
+        preferences: Dict[str, str]
+    ) -> Dict[str, Any]:
+        return await self._request(
+            "POST",
+            f"/ai-tools/user-preferences/{user_id}",
+            json_data=preferences
         )

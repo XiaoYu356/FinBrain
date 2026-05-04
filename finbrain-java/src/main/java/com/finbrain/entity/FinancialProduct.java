@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -27,6 +28,20 @@ public class FinancialProduct implements Serializable {
     private Integer termDays;
 
     private Integer saleStatus;
+
+    private Integer status;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
+    private LocalDate maturityDate;
+
+    private BigDecimal maxAmount;
+
+    private Integer riskLevel;
+
+    private String issuer;
 
     private String description;
 

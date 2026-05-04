@@ -3,6 +3,7 @@ package com.finbrain.dto;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 public class AdminProductDTO {
@@ -17,7 +18,19 @@ public class AdminProductDTO {
 
     private BigDecimal minAmount;
 
+    private BigDecimal maxAmount;
+
     private Integer termDays;
+
+    private Integer riskLevel;
+
+    private String issuer;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
+    private LocalDate maturityDate;
 
     private String description;
 

@@ -13,14 +13,58 @@ export const getRiskDesc = (level) => {
   return descs[level] || '保守型'
 }
 
-export const getStatusTagType = (status) => {
-  const types = { 0: 'warning', 1: 'success', 2: 'info', 3: 'danger' }
+export const getOrderStatusTagType = (status) => {
+  const types = { 
+    0: 'warning',  // 待确认
+    1: 'success',  // 已确认
+    2: 'info',     // 已取消
+    3: 'primary',  // 已赎回
+    4: 'danger',   // 已到期
+    5: ''          // 已结算
+  }
   return types[status] || 'info'
 }
 
-export const getStatusText = (status) => {
-  const texts = { 0: '待确认', 1: '已确认', 2: '已取消', 3: '已赎回' }
+export const getOrderStatusText = (status) => {
+  const texts = { 
+    0: '待确认', 
+    1: '已确认', 
+    2: '已取消', 
+    3: '已赎回',
+    4: '已到期',
+    5: '已结算'
+  }
   return texts[status] || '未知'
+}
+
+export const getProductStatusTagType = (status) => {
+  const types = { 
+    0: 'info',     // 草稿
+    1: 'success',  // 募集期
+    2: 'primary',  // 存续期
+    3: 'warning',  // 已到期
+    4: 'danger'    // 已下架
+  }
+  return types[status] || 'info'
+}
+
+export const getProductStatusText = (status) => {
+  const texts = { 
+    0: '草稿', 
+    1: '募集期', 
+    2: '存续期', 
+    3: '已到期',
+    4: '已下架'
+  }
+  return texts[status] || '未知'
+}
+
+export const getStatusTagType = (status) => {
+  return getOrderStatusTagType(status)
+}
+
+export const getStatusText = (status) => {
+  return getOrderStatusText(status)
 }
 
 export const getSaleText = (status) => {

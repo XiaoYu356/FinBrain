@@ -6,7 +6,7 @@ from agents.memory import memory_manager
 from tools.tool_definitions import get_tool_descriptions, get_tool_names
 from tools import (
     search_products, calculate_income, get_user_asset,
-    create_order, query_orders, submit_risk_assessment
+    create_order, query_orders, submit_risk_assessment, get_user_risk_level
 )
 from rag.retriever import Retriever
 from llm.qwen_client import QwenLLM
@@ -229,6 +229,9 @@ async def act(state: AgentState) -> Dict[str, Any]:
             
         elif action == "query_orders":
             observation = await query_orders(user_id=user_id)
+            
+        elif action == "get_user_risk_level":
+            observation = await get_user_risk_level(user_id=user_id)
             
         elif action == "submit_risk_assessment":
             observation = await submit_risk_assessment(

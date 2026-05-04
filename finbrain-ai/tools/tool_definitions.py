@@ -195,6 +195,28 @@ TOOL_DEFINITIONS: List[ToolDefinition] = [
     ),
     
     ToolDefinition(
+        name="get_user_risk_level",
+        description="""查询当前用户的风险测评结果。
+
+返回用户是否已完成风险测评，以及当前的风险等级（C1-C5）。
+系统会自动识别当前登录用户，无需传递用户ID。
+
+风险等级说明：
+- C1: 保守型（适合R1产品）
+- C2: 谨慎型（适合R1-R2产品）
+- C3: 稳健型（适合R1-R3产品）
+- C4: 进取型（适合R1-R4产品）
+- C5: 激进型（适合所有产品）""",
+        parameters=[],
+        when_to_use="当需要了解用户的风险承受能力时使用，特别是在推荐理财产品之前，应先查询用户的风险等级",
+        examples=[
+            "用户问'推荐适合我的产品' → 先调用 get_user_risk_level() 查询风险等级",
+            "用户问'我能买什么产品？' → 先调用 get_user_risk_level() 查询风险等级"
+        ],
+        requires_user_context=True
+    ),
+    
+    ToolDefinition(
         name="submit_risk_assessment",
         description="""提交风险测评问卷，评估用户风险承受能力。
 

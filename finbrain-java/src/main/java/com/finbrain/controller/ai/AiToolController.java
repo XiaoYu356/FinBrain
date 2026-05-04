@@ -10,6 +10,7 @@ import com.finbrain.service.AccountService;
 import com.finbrain.service.OrderService;
 import com.finbrain.service.ProductService;
 import com.finbrain.service.RiskService;
+import com.finbrain.service.UserPreferenceService;
 import com.finbrain.utils.Result;
 import com.finbrain.vo.AssetVO;
 import com.finbrain.vo.OrderVO;
@@ -36,6 +37,7 @@ public class AiToolController {
     private final AccountService accountService;
     private final OrderService orderService;
     private final RiskService riskService;
+    private final UserPreferenceService userPreferenceService;
 
     @Operation(summary = "搜索理财产品")
     @PostMapping("/search-products")
@@ -183,6 +185,60 @@ public class AiToolController {
             result.put("riskLevel", assessment.getRiskLevel());
             result.put("riskLevelDesc", assessment.getRiskLevelDesc());
             result.put("message", "风险测评提交成功");
+            
+            return Result.success(result);
+        } catch (Exception e) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("message", e.getMessage());
+            return Result.success(result);
+        }
+    }
+
+    @Operation(summary = "获取用户风险等级")
+    @GetMapping("/risk-level/{userId}")
+    public Result<Map<String, Object>> getUserRiskLevel(@PathVariable Long userId) {
+        var assessment = riskService.getLatestAssessment(userId);
+        
+        Map<String, Object> result = new HashMap<>();
+        if (assessment == null) {
+            result.put("hasAssessment", false);
+            result.put("message", "用户尚未完成风险测评");
+        } else {
+            result.put("hasAssessment", true);
+            result.put("score", assessment.getScore());
+            result.put("riskLevel", assessment.getRiskLevel());
+            result.put("riskLevelDesc", assessment.getRiskLevelDesc());
+            result.put("assessmentTime", assessment.getAssessmentTime());
+        }
+        
+        return Result.success(result);
+    }
+
+    @Operation(summary = "获取用户偏好")
+    @GetMapping("/user-preferences/{userId}")
+    public Result<Map<String, Object>> getUserPreferences(@PathVariable Long userId) {
+        Map<String, String> preferences = userPreferenceService.getAllPreferences(userId);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("preferences", preferences);
+        
+        return Result.success(result);
+    }
+
+    @Operation(summary = "保存用户偏好")
+    @PostMapping("/user-preferences/{userId}")
+    public Result<Map<String, Object>> saveUserPreferences(
+            @PathVariable Long userId,
+            @RequestBody Map<String, String> preferences) {
+        
+        try {
+            userPreferenceService.setPreferences(userId, preferences);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("message", "用户偏好保存成功");
             
             return Result.success(result);
         } catch (Exception e) {

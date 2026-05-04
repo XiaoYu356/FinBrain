@@ -5,11 +5,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.finbrain.dto.AdminProductDTO;
 import com.finbrain.entity.FinancialProduct;
+import com.finbrain.entity.ProductLifecycleLog;
 import com.finbrain.entity.ProductOrder;
 import com.finbrain.entity.User;
 import com.finbrain.entity.UserAccount;
+import com.finbrain.enums.ProductStatus;
 import com.finbrain.exception.BusinessException;
 import com.finbrain.mapper.FinancialProductMapper;
+import com.finbrain.mapper.ProductLifecycleLogMapper;
 import com.finbrain.mapper.ProductOrderMapper;
 import com.finbrain.mapper.UserAccountMapper;
 import com.finbrain.mapper.UserMapper;
@@ -41,6 +44,7 @@ public class AdminServiceImpl implements AdminService {
     private final UserAccountMapper userAccountMapper;
     private final FinancialProductMapper productMapper;
     private final ProductOrderMapper orderMapper;
+    private final ProductLifecycleLogMapper lifecycleLogMapper;
 
     @Override
     public Page<AdminUserVO> getUserList(Integer pageNum, Integer pageSize, String keyword) {
@@ -114,10 +118,13 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Page<ProductVO> getProductList(Integer pageNum, Integer pageSize) {
+    public Page<ProductVO> getProductList(Integer pageNum, Integer pageSize, Integer status) {
         Page<FinancialProduct> page = new Page<>(pageNum, pageSize);
         
         LambdaQueryWrapper<FinancialProduct> wrapper = new LambdaQueryWrapper<>();
+        if (status != null) {
+            wrapper.eq(FinancialProduct::getStatus, status);
+        }
         wrapper.orderByDesc(FinancialProduct::getCreateTime);
         
         Page<FinancialProduct> productPage = productMapper.selectPage(page, wrapper);
@@ -126,10 +133,21 @@ public class AdminServiceImpl implements AdminService {
         voPage.setRecords(productPage.getRecords().stream().map(product -> {
             ProductVO vo = new ProductVO();
             BeanUtil.copyProperties(product, vo);
+            
+            ProductStatus productStatus = ProductStatus.fromCode(product.getStatus());
+            if (productStatus != null) {
+                vo.setStatusName(productStatus.getDesc());
+            }
+            
             return vo;
         }).collect(Collectors.toList()));
         
         return voPage;
+    }
+
+    @Override
+    public FinancialProduct getProductById(Long id) {
+        return productMapper.selectById(id);
     }
 
     @Override
@@ -138,6 +156,7 @@ public class AdminServiceImpl implements AdminService {
         FinancialProduct product = new FinancialProduct();
         BeanUtil.copyProperties(dto, product);
         product.setSaleStatus(1);
+        product.setStatus(ProductStatus.DRAFT.getCode());
         productMapper.insert(product);
         log.info("管理员添加产品: {}", product.getProductName());
     }
@@ -175,6 +194,17 @@ public class AdminServiceImpl implements AdminService {
         if (product == null) {
             throw new BusinessException("产品不存在");
         }
+        
+        Long orderCount = orderMapper.selectCount(
+                new LambdaQueryWrapper<ProductOrder>().eq(ProductOrder::getProductId, id)
+        );
+        if (orderCount > 0) {
+            throw new BusinessException("该产品存在关联订单，无法删除。请先下架产品。");
+        }
+        
+        lifecycleLogMapper.delete(
+                new LambdaQueryWrapper<ProductLifecycleLog>().eq(ProductLifecycleLog::getProductId, id)
+        );
         
         productMapper.deleteById(id);
         log.info("管理员删除产品: {}", product.getProductName());

@@ -2,6 +2,7 @@ package com.finbrain.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.finbrain.dto.AdminProductDTO;
+import com.finbrain.entity.FinancialProduct;
 import com.finbrain.vo.AdminAssetVO;
 import com.finbrain.vo.AdminOrderVO;
 import com.finbrain.vo.AdminUserVO;
@@ -16,7 +17,9 @@ public interface AdminService {
 
     void updateUserStatus(Long currentUserId, Long id, Integer status);
 
-    Page<ProductVO> getProductList(Integer pageNum, Integer pageSize);
+    Page<ProductVO> getProductList(Integer pageNum, Integer pageSize, Integer status);
+
+    FinancialProduct getProductById(Long id);
 
     void addProduct(AdminProductDTO dto);
 

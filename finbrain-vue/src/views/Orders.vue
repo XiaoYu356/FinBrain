@@ -20,6 +20,16 @@
             {{ row.shares?.toFixed(2) || '0.00' }}
           </template>
         </el-table-column>
+        <el-table-column prop="annualReturnRate" label="年化收益" width="100">
+          <template #default="{ row }">
+            <span style="color: #F56C6C;">{{ row.annualReturnRate }}%</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="expectedIncome" label="预计收益" width="120">
+          <template #default="{ row }">
+            <span style="color: #67C23A;">{{ formatMoney(row.expectedIncome) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusTagType(row.status)">{{ row.statusText }}</el-tag>
@@ -63,11 +73,16 @@
         <el-descriptions-item label="产品名称">{{ currentOrder.productName }}</el-descriptions-item>
         <el-descriptions-item label="申购金额">{{ formatMoney(currentOrder.amount) }}</el-descriptions-item>
         <el-descriptions-item label="份额">{{ currentOrder.shares?.toFixed(2) || '0.00' }}</el-descriptions-item>
+        <el-descriptions-item label="年化收益率">{{ currentOrder.annualReturnRate }}%</el-descriptions-item>
+        <el-descriptions-item label="期限">{{ currentOrder.termDays }}天</el-descriptions-item>
+        <el-descriptions-item label="预计收益">{{ formatMoney(currentOrder.expectedIncome) }}</el-descriptions-item>
+        <el-descriptions-item label="实际收益">{{ formatMoney(currentOrder.actualIncome) }}</el-descriptions-item>
         <el-descriptions-item label="状态">
           <el-tag :type="getStatusTagType(currentOrder.status)">{{ currentOrder.statusText }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="下单时间">{{ formatTime(currentOrder.orderTime) }}</el-descriptions-item>
-        <el-descriptions-item label="确认时间">{{ formatTime(currentOrder.successTime) || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="确认时间">{{ formatTime(currentOrder.confirmTime) || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="到期日期">{{ currentOrder.maturityDate || '-' }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>

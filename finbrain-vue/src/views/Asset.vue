@@ -67,14 +67,31 @@
                 {{ row.termDays }}天
               </template>
             </el-table-column>
+            <el-table-column prop="maturityDate" label="到期日" width="120">
+              <template #default="{ row }">
+                {{ row.maturityDate || '-' }}
+              </template>
+            </el-table-column>
             <el-table-column prop="expectedIncome" label="预计收益" width="150">
               <template #default="{ row }">
                 <span style="color: #67C23A;">{{ formatMoney(row.expectedIncome) }}</span>
               </template>
             </el-table-column>
+            <el-table-column prop="status" label="状态" width="100">
+              <template #default="{ row }">
+                <el-tag :type="getOrderStatusTagType(row.status)">{{ row.statusText }}</el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" width="100">
               <template #default="{ row }">
-                <el-button type="danger" size="small" @click="handleRedeem(row)">赎回</el-button>
+                <el-button 
+                  v-if="row.status === 1" 
+                  type="danger" 
+                  size="small" 
+                  @click="handleRedeem(row)"
+                >赎回</el-button>
+                <span v-else-if="row.status === 4" style="color: #E6A23A;">待结算</span>
+                <span v-else>-</span>
               </template>
             </el-table-column>
           </el-table>
@@ -112,7 +129,7 @@ import * as echarts from 'echarts'
 import { getAssetInfo, recharge } from '@/api/account'
 import { getOrderList, redeemOrder } from '@/api/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { formatMoney, getRiskTagType, calculateExpectedIncome } from '@/utils/format'
+import { formatMoney, getRiskTagType, getOrderStatusTagType, calculateExpectedIncome } from '@/utils/format'
 
 const pieChartRef = ref()
 const loading = ref(false)
@@ -156,7 +173,7 @@ const handleRecharge = async () => {
 const handleRedeem = async (row) => {
   try {
     await ElMessageBox.confirm(
-      `确定要赎回「${row.productName}」吗？赎回金额: ${formatMoney(row.amount)}`,
+      `确定要赎回「${row.productName}」吗？\n本金: ${formatMoney(row.amount)}\n预计收益: ${formatMoney(row.expectedIncome)}`,
       '赎回确认',
       {
         confirmButtonText: '确定赎回',
@@ -221,7 +238,7 @@ const fetchData = async () => {
     
     const orderRes = await getOrderList({ pageNum: 1, pageSize: 100 })
     holdings.value = (orderRes.data.records || [])
-      .filter(o => o.status === 1)
+      .filter(o => o.status === 1 || o.status === 4)
       .map(o => ({
         ...o,
         expectedIncome: calculateExpectedIncome(o.amount, o.annualReturnRate, o.termDays)
