@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     LANGSMITH_PROJECT: str = "finbrain"
     LANGCHAIN_TRACING_V2: bool = True
     
+    HF_ENDPOINT: str = "https://hf-mirror.com"
+    RERANKER_MODEL: str = "BAAI/bge-reranker-base"
+    RERANKER_PRELOAD: bool = True  # 是否在启动时预加载重排序模型
+    
     class Config:
         env_file = find_env_file()
         env_file_encoding = "utf-8"

@@ -19,6 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -76,6 +78,31 @@ public class KnowledgeDocumentServiceImpl implements KnowledgeDocumentService {
             log.error("文档上传失败: {}", e.getMessage(), e);
             throw new RuntimeException("文档上传失败: " + e.getMessage());
         }
+    }
+
+    @Override
+    public List<KnowledgeDocument> uploadDocuments(MultipartFile[] files, Long userId) {
+        if (files == null || files.length == 0) {
+            return new ArrayList<>();
+        }
+
+        List<KnowledgeDocument> uploadedDocuments = new ArrayList<>();
+        int successCount = 0;
+        int failCount = 0;
+
+        for (MultipartFile file : files) {
+            try {
+                KnowledgeDocument document = uploadDocument(file, userId);
+                uploadedDocuments.add(document);
+                successCount++;
+            } catch (Exception e) {
+                log.error("批量上传文档失败，文件名: {}, 错误: {}", file.getOriginalFilename(), e.getMessage());
+                failCount++;
+            }
+        }
+
+        log.info("批量上传完成，成功: {}, 失败: {}", successCount, failCount);
+        return uploadedDocuments;
     }
 
     @Override
@@ -165,6 +192,28 @@ public class KnowledgeDocumentServiceImpl implements KnowledgeDocumentService {
             log.error("文档删除失败: {}", e.getMessage(), e);
             throw new RuntimeException("文档删除失败: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void deleteDocuments(List<Long> ids, Long userId) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+
+        int successCount = 0;
+        int failCount = 0;
+
+        for (Long id : ids) {
+            try {
+                deleteDocument(id, userId);
+                successCount++;
+            } catch (Exception e) {
+                log.error("批量删除文档失败，文档ID: {}, 错误: {}", id, e.getMessage());
+                failCount++;
+            }
+        }
+
+        log.info("批量删除完成，成功: {}, 失败: {}", successCount, failCount);
     }
 
     @Override

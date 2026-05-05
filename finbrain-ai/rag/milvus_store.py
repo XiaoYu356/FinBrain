@@ -146,6 +146,83 @@ class MilvusStore:
             else:
                 return False
         
-        self.collection.delete(f"id in [{doc_id}]")
-        self.collection.flush()
+        self.collection.load()
+        
+        results = self.collection.query(
+            expr="id >= 0",
+            output_fields=["id", "metadata"],
+            limit=10000
+        )
+        
+        ids_to_delete = []
+        for r in results:
+            metadata = r.get("metadata", "{}")
+            try:
+                meta = json.loads(metadata)
+                if meta.get("document_id") == doc_id:
+                    ids_to_delete.append(r["id"])
+            except:
+                pass
+        
+        if ids_to_delete:
+            self.collection.delete(f"id in {ids_to_delete}")
+            self.collection.flush()
+        
         return True
+    
+    def delete_documents(self, doc_ids: List[int]) -> dict:
+        if not self.collection:
+            if utility.has_collection(self.collection_name):
+                self.collection = Collection(self.collection_name)
+            else:
+                return {"success": True, "deleted_count": 0}
+        
+        self.collection.load()
+        
+        results = self.collection.query(
+            expr="id >= 0",
+            output_fields=["id", "metadata"],
+            limit=10000
+        )
+        
+        ids_to_delete = []
+        for r in results:
+            metadata = r.get("metadata", "{}")
+            try:
+                meta = json.loads(metadata)
+                if meta.get("document_id") in doc_ids:
+                    ids_to_delete.append(r["id"])
+            except:
+                pass
+        
+        if ids_to_delete:
+            self.collection.delete(f"id in {ids_to_delete}")
+            self.collection.flush()
+        
+        return {"success": True, "deleted_count": len(ids_to_delete)}
+    
+    def clear_all(self) -> bool:
+        if not self.collection:
+            if utility.has_collection(self.collection_name):
+                self.collection = Collection(self.collection_name)
+            else:
+                return True
+        
+        self.collection.drop()
+        self.collection = None
+        
+        return True
+    
+    def get_stats(self) -> dict:
+        if not self.collection:
+            if utility.has_collection(self.collection_name):
+                self.collection = Collection(self.collection_name)
+            else:
+                return {"total": 0, "collections": utility.list_collections()}
+        
+        self.collection.load()
+        return {
+            "total": self.collection.num_entities,
+            "collection_name": self.collection_name,
+            "collections": utility.list_collections()
+        }

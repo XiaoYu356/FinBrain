@@ -196,7 +196,26 @@ async def act(state: AgentState) -> Dict[str, Any]:
         if action == "rag_search":
             query = action_input.get("query", state.get("current_message", ""))
             retriever = Retriever()
-            context = retriever.get_context(query)
+            
+            documents = retriever.retrieve(
+                query,
+                top_k=5,
+                retrieval_type="hybrid",
+                vector_top_k=20,
+                keyword_top_k=20,
+                fusion_weights={"vector": 0.5, "keyword": 0.5},
+                rerank_enabled=True,
+                rerank_top_k=5
+            )
+            
+            if not documents:
+                context = ""
+            else:
+                context_parts = []
+                for i, doc in enumerate(documents, 1):
+                    context_parts.append(f"[文档{i}]\n{doc.get('content', '')}\n")
+                context = "\n".join(context_parts)
+            
             observation = {"success": True, "context": context}
             
         elif action == "search_products":

@@ -124,6 +124,18 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   const isLoggedIn = !!userStore.token
+
+  if (isLoggedIn && !userStore.userInfo) {
+    try {
+      await userStore.fetchUserInfo()
+    } catch (e) {
+      userStore.token = ''
+      localStorage.removeItem('token')
+      sessionStorage.removeItem('token')
+      next('/login')
+      return
+    }
+  }
   
   if (to.meta.requiresAuth && !isLoggedIn) {
     next('/login')

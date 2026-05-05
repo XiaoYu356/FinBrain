@@ -166,6 +166,14 @@ export function deleteKnowledgeDocument(id) {
   })
 }
 
+export function deleteKnowledgeDocuments(ids) {
+  return request({
+    url: '/admin/knowledge/documents/batch',
+    method: 'delete',
+    data: ids
+  })
+}
+
 export function reprocessDocument(id) {
   return request({
     url: `/admin/knowledge/documents/${id}/process`,

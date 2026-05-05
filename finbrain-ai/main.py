@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,12 +8,16 @@ from typing import Optional, List
 import asyncio
 import time
 
+from config import get_settings
+settings = get_settings()
+os.environ['HF_ENDPOINT'] = settings.HF_ENDPOINT
+
 from agents import agent_graph, create_initial_state
 from agents.memory import memory_manager
 from rag.milvus_store import MilvusStore
 from rag.document_loader import DocumentLoader
+from rag.reranker import get_reranker
 from java_client import java_client
-from config import get_settings
 from utils.redis_client import redis_memory_store, close_redis
 
 logging.basicConfig(
@@ -25,6 +30,9 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger("finbrain-ai")
+
+logger.info(f"使用 HuggingFace 镜像: {settings.HF_ENDPOINT}")
+logger.info(f"重排序模型: {settings.RERANKER_MODEL}")
 
 app = FastAPI(
     title="FinBrain AI Service",
@@ -98,11 +106,37 @@ async def delete_session(user_id: int, session_id: str):
 async def startup_event():
     memory_manager.set_redis_store(redis_memory_store)
     memory_manager.set_mysql_client(java_client)
+    
+    if settings.RERANKER_PRELOAD:
+        logger.info("=" * 50)
+        logger.info("开始预加载模型...")
+        logger.info("=" * 50)
+        
+        try:
+            logger.info("正在预加载重排序模型 (CrossEncoder)...")
+            reranker = get_reranker(use_llm=False)
+            logger.info(f"重排序器实例创建成功: {type(reranker).__name__}")
+            
+            if hasattr(reranker, 'preload'):
+                logger.info("开始调用 preload 方法...")
+                reranker.preload()
+                logger.info("✅ 重排序模型预加载成功")
+            else:
+                logger.info("✅ 重排序模型已就绪")
+        except Exception as e:
+            logger.error(f"❌ 重排序模型预加载失败: {e}", exc_info=True)
+            logger.warning("将在首次使用时加载模型")
+        
+        logger.info("=" * 50)
+    else:
+        logger.info("重排序模型预加载已禁用，将在首次使用时加载")
+    
     logger.info("🚀 FinBrain AI Service 启动成功!")
     logger.info("📡 服务地址: http://0.0.0.0:8001")
     logger.info("📖 API文档: http://0.0.0.0:8001/docs")
     logger.info("💾 Redis持久化已启用")
     logger.info("🗄️ MySQL持久化已启用")
+    logger.info("=" * 50)
 
 
 @app.on_event("shutdown")
@@ -299,6 +333,13 @@ async def delete_document(doc_id: int):
         success = store.delete_document(doc_id)
         
         if success:
+            try:
+                from rag.bm25_retriever import remove_document_from_bm25
+                remove_document_from_bm25(doc_id)
+                logger.info("BM25 索引已更新")
+            except Exception as e:
+                logger.warning(f"更新 BM25 索引失败: {e}")
+            
             logger.info(f"删除文档成功: {doc_id}")
             return {"success": True, "message": "文档删除成功"}
         else:
@@ -358,6 +399,13 @@ async def process_document(request: ProcessDocumentRequest):
         
         store.insert_documents(documents)
         
+        try:
+            from rag.bm25_retriever import rebuild_bm25_index
+            rebuild_bm25_index()
+            logger.info("BM25 索引已重建")
+        except Exception as e:
+            logger.warning(f"更新 BM25 索引失败: {e}")
+        
         logger.info(f"文档处理完成: {request.document_id}, 切块数: {len(chunks)}")
         return {"success": True, "chunk_count": len(chunks)}
     
@@ -370,14 +418,327 @@ class DeleteDocumentRequest(BaseModel):
     document_id: int
 
 
+class DeleteDocumentsRequest(BaseModel):
+    document_ids: List[int]
+
+
 @app.post("/rag/delete-document")
 async def delete_document_vectors(request: DeleteDocumentRequest):
     try:
         store = MilvusStore()
+        success = store.delete_document(request.document_id)
         
-        return {"success": True, "message": "向量删除成功"}
+        if success:
+            try:
+                from rag.bm25_retriever import remove_document_from_bm25
+                remove_document_from_bm25(request.document_id)
+                logger.info("BM25 索引已更新")
+            except Exception as e:
+                logger.warning(f"更新 BM25 索引失败: {e}")
+            
+            logger.info(f"向量删除成功: {request.document_id}")
+            return {"success": True, "message": "向量删除成功"}
+        else:
+            return {"success": False, "message": "删除失败"}
     except Exception as e:
         logger.error(f"删除向量失败: {str(e)}", exc_info=True)
+        return {"success": False, "message": str(e)}
+
+
+@app.post("/rag/delete-documents")
+async def delete_documents_vectors(request: DeleteDocumentsRequest):
+    try:
+        store = MilvusStore()
+        result = store.delete_documents(request.document_ids)
+        
+        if result["success"]:
+            try:
+                from rag.bm25_retriever import remove_document_from_bm25
+                for doc_id in request.document_ids:
+                    remove_document_from_bm25(doc_id)
+                logger.info("BM25 索引已更新")
+            except Exception as e:
+                logger.warning(f"更新 BM25 索引失败: {e}")
+            
+            logger.info(f"批量删除向量成功: {len(request.document_ids)} 个文档")
+            return {"success": True, "message": f"成功删除 {result['deleted_count']} 个向量", "deleted_count": result['deleted_count']}
+        else:
+            return {"success": False, "message": "删除失败"}
+    except Exception as e:
+        logger.error(f"批量删除向量失败: {str(e)}", exc_info=True)
+        return {"success": False, "message": str(e)}
+
+
+@app.get("/rag/evaluation/test-doc")
+async def get_test_document():
+    from rag.evaluator import get_knowledge_doc
+    
+    return {
+        "success": True,
+        "data": {
+            "filename": "金融理财产品知识手册.md",
+            "content": get_knowledge_doc()
+        }
+    }
+
+
+@app.get("/rag/evaluation/test-docs")
+async def get_test_doc_list():
+    from rag.evaluator import get_test_doc_list
+    
+    return {
+        "success": True,
+        "data": {
+            "docs": get_test_doc_list(),
+            "local_path": "d:\\code\\FinBrain\\测试文档\\",
+            "total": len(get_test_doc_list())
+        }
+    }
+
+
+@app.get("/rag/evaluation/test-cases")
+async def get_test_cases():
+    from rag.evaluator import get_test_cases
+    
+    cases = get_test_cases()
+    return {
+        "success": True,
+        "data": {
+            "total": len(cases),
+            "cases": [
+                {
+                    "question": c.question,
+                    "ground_truth": c.ground_truth,
+                    "relevant_docs": c.relevant_docs
+                }
+                for c in cases
+            ]
+        }
+    }
+
+
+class EvaluateRequest(BaseModel):
+    top_k: int = 5
+    save_record: bool = True
+    config: dict = {}
+    retrieval_type: str = "vector_only"
+    vector_top_k: int = 20
+    keyword_top_k: int = 20
+    fusion_weights: Optional[dict] = None
+    rerank_enabled: bool = False
+    rerank_top_k: int = 5
+
+
+@app.post("/rag/evaluation/run")
+async def run_evaluation(request: EvaluateRequest):
+    from rag.evaluator import (
+        get_test_cases, EvaluationRecord, 
+        save_evaluation_record, TestCase
+    )
+    from rag.retriever import Retriever
+    from datetime import datetime
+    
+    try:
+        test_cases = get_test_cases()
+        retriever = Retriever()
+        
+        import re
+        def normalize(text):
+            return re.sub(r'[^\w\u4e00-\u9fff]', '', text).lower()
+        
+        def is_relevant(rel_doc, ret_content):
+            norm_rel = normalize(rel_doc)
+            norm_ret = normalize(ret_content)
+            
+            if norm_rel in norm_ret:
+                return True
+            
+            rel_chars = list(norm_rel)
+            matched = sum(1 for c in rel_chars if c in norm_ret)
+            return matched >= len(rel_chars) * 0.7
+        
+        results = []
+        total_precision = 0
+        total_recall = 0
+        
+        for case in test_cases:
+            retrieved_docs = retriever.retrieve(
+                case.question,
+                top_k=request.top_k,
+                retrieval_type=request.retrieval_type,
+                vector_top_k=request.vector_top_k,
+                keyword_top_k=request.keyword_top_k,
+                fusion_weights=request.fusion_weights,
+                rerank_enabled=request.rerank_enabled,
+                rerank_top_k=request.rerank_top_k
+            )
+            retrieved_contents = [doc.get("content", "") for doc in retrieved_docs]
+            
+            relevant_docs_found = 0
+            for rel_doc in case.relevant_docs:
+                for ret_content in retrieved_contents:
+                    if is_relevant(rel_doc, ret_content):
+                        relevant_docs_found += 1
+                        break
+            
+            relevant_retrieved_count = 0
+            for ret_content in retrieved_contents:
+                for rel_doc in case.relevant_docs:
+                    if is_relevant(rel_doc, ret_content):
+                        relevant_retrieved_count += 1
+                        break
+            
+            precision = relevant_retrieved_count / len(retrieved_contents) if retrieved_contents else 0
+            recall = relevant_docs_found / len(case.relevant_docs) if case.relevant_docs else 0
+            
+            total_precision += precision
+            total_recall += recall
+            
+            results.append({
+                "question": case.question,
+                "precision": precision,
+                "recall": recall,
+                "retrieved_count": len(retrieved_contents),
+                "relevant_found": relevant_docs_found
+            })
+        
+        n = len(test_cases)
+        avg_precision = total_precision / n if n > 0 else 0
+        avg_recall = total_recall / n if n > 0 else 0
+        f1 = 2 * avg_precision * avg_recall / (avg_precision + avg_recall) if (avg_precision + avg_recall) > 0 else 0
+        
+        evaluation_data = {
+            "timestamp": datetime.now().isoformat(),
+            "precision": round(avg_precision, 4),
+            "recall": round(avg_recall, 4),
+            "f1_score": round(f1, 4),
+            "faithfulness": 0,
+            "answer_relevancy": 0,
+            "context_recall": round(avg_recall, 4),
+            "context_precision": round(avg_precision, 4),
+            "config": {
+                **request.config,
+                "retrieval_type": request.retrieval_type,
+                "vector_top_k": request.vector_top_k,
+                "keyword_top_k": request.keyword_top_k,
+                "fusion_weights": request.fusion_weights,
+                "rerank_enabled": request.rerank_enabled,
+                "rerank_top_k": request.rerank_top_k
+            },
+            "details": results
+        }
+        
+        if request.save_record:
+            record = EvaluationRecord(**evaluation_data)
+            save_evaluation_record(record)
+        
+        return {
+            "success": True,
+            "data": evaluation_data
+        }
+    except Exception as e:
+        logger.error(f"评估失败: {str(e)}", exc_info=True)
+        return {"success": False, "message": str(e)}
+
+
+@app.get("/rag/evaluation/history")
+async def get_evaluation_history():
+    from rag.evaluator import load_evaluation_history
+    
+    history = load_evaluation_history()
+    return {
+        "success": True,
+        "data": history
+    }
+
+
+@app.post("/rag/evaluation/compare")
+async def compare_evaluations(baseline_id: int, current_id: int):
+    from rag.evaluator import load_evaluation_history, compare_evaluations
+    
+    history = load_evaluation_history()
+    
+    if baseline_id >= len(history) or current_id >= len(history):
+        return {"success": False, "message": "无效的评估记录ID"}
+    
+    result = compare_evaluations(history[baseline_id], history[current_id])
+    return {
+        "success": True,
+        "data": result
+    }
+
+
+@app.post("/rag/bm25/rebuild")
+async def rebuild_bm25():
+    try:
+        from rag.bm25_retriever import rebuild_bm25_index
+        bm25 = rebuild_bm25_index()
+        return {
+            "success": True,
+            "message": "BM25 索引重建成功",
+            "doc_count": len(bm25.doc_ids),
+            "term_count": len(bm25.df)
+        }
+    except Exception as e:
+        logger.error(f"重建 BM25 索引失败: {e}", exc_info=True)
+        return {"success": False, "message": str(e)}
+
+
+@app.get("/rag/bm25/status")
+async def get_bm25_status():
+    try:
+        from rag.bm25_retriever import get_bm25
+        bm25 = get_bm25()
+        return {
+            "success": True,
+            "data": {
+                "initialized": bm25._initialized,
+                "doc_count": len(bm25.doc_ids),
+                "term_count": len(bm25.df),
+                "avgdl": bm25.avgdl
+            }
+        }
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+@app.delete("/rag/bm25/clear")
+async def clear_bm25():
+    try:
+        from rag.bm25_retriever import get_bm25_redis_storage
+        storage = get_bm25_redis_storage()
+        storage.clear_index()
+        return {"success": True, "message": "BM25 索引已清除"}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+@app.delete("/rag/vectors/clear")
+async def clear_all_vectors():
+    try:
+        from rag.milvus_store import MilvusStore
+        from rag.bm25_retriever import get_bm25_redis_storage
+        
+        store = MilvusStore()
+        store.clear_all()
+        
+        storage = get_bm25_redis_storage()
+        storage.clear_index()
+        
+        return {"success": True, "message": "所有向量数据和BM25索引已清除"}
+    except Exception as e:
+        logger.error(f"清除向量数据失败: {e}", exc_info=True)
+        return {"success": False, "message": str(e)}
+
+
+@app.get("/rag/vectors/stats")
+async def get_vector_stats():
+    try:
+        from rag.milvus_store import MilvusStore
+        store = MilvusStore()
+        stats = store.get_stats()
+        return {"success": True, "data": stats}
+    except Exception as e:
         return {"success": False, "message": str(e)}
 
 

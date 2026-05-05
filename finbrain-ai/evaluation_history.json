@@ -1,0 +1,1184 @@
+[
+  {
+    "timestamp": "2026-05-05T15:46:14.700280",
+    "precision": 0.5887,
+    "recall": 0.9811,
+    "f1_score": 0.7358,
+    "faithfulness": 0,
+    "answer_relevancy": 0,
+    "context_recall": 0.9811,
+    "context_precision": 0.5887,
+    "config": {
+      "description": "基准测试 - 纯向量检索",
+      "retrieval_type": "vector_only",
+      "vector_top_k": 5,
+      "keyword_top_k": 20,
+      "fusion_weights": null,
+      "rerank_enabled": false,
+      "rerank_top_k": 5
+    },
+    "details": [
+      {
+        "question": "理财产品按照风险等级可以分为哪几类？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是风险测评？有什么意义？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "投资者风险等级分为哪几类？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "基金定投有什么优势？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "货币基金的年化收益率大概是多少？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "资产配置的核心原则有哪些？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是年龄法则？",
+        "precision": 0.4,
+        "recall": 0.6666666666666666,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "基金投资涉及哪些费用？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "常见的投资风险有哪些？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "投资者享有哪些权益？",
+        "precision": 0.2,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "股票按照市值规模可以分为哪几类？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是市盈率？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "价值投资的核心原则是什么？",
+        "precision": 0.2,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "债券按发行主体可以分为哪几类？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "债券价格与市场利率是什么关系？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "重疾险的投保建议是什么？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "家庭保险配置的原则是什么？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "期货的保证金制度是什么？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "养老规划的三大支柱是什么？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是夏普比率？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "R1级理财产品适合哪类投资者？有什么特点？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "股票基金的申购费和赎回费分别是多少？如何降低费用？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "保守型投资者应该如何进行资产配置？",
+        "precision": 0.4,
+        "recall": 0.3333333333333333,
+        "retrieved_count": 5,
+        "relevant_found": 1
+      },
+      {
+        "question": "什么是套期保值？期货如何帮助企业管理风险？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "个人养老金制度有什么税收优惠？年度缴费上限是多少？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是看涨期权和看跌期权？它们有什么区别？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "外汇市场有什么特点？日均交易量是多少？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "房产投资的租金回报率如何计算？一线城市大概是多少？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "金融市场的核心功能有哪些？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "货币市场和资本市场有什么区别？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "股票发行市场和流通市场有什么区别？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "股票交易实行什么制度？涨跌幅限制是多少？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "债券投资有哪些风险？如何管理信用风险？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是VaR（在险价值）？如何计算？",
+        "precision": 0.2,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是行为金融学？常见的投资行为偏差有哪些？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 6
+      },
+      {
+        "question": "什么是均值-方差模型？有什么应用？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是Black-Litterman模型？有什么优势？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是风险平价模型？有什么特点？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是Brinson模型？如何进行业绩归因分析？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是特雷诺比率？与夏普比率有什么区别？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是詹森阿尔法？如何判断投资管理人的能力？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是信息比率？适用于什么场景？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是最大回撤？如何计算？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是条件在险价值（CVaR）？与VaR有什么区别？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "开放式基金和封闭式基金有什么区别？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是目标日期基金？有什么特点？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是复利效应？每月投资2000元，年化收益率8%，30年后有多少？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是骑乘策略？如何通过债券期限获利？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是套息交易？有什么风险？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是强行平仓制度？什么情况下会被强平？",
+        "precision": 0.2,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是欧式期权和美式期权？有什么区别？",
+        "precision": 0.2,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "医疗险有哪些类型？百万医疗险有什么特点？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是定期寿险和终身寿险？分别适合什么人群？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-05-05T16:50:44.198499",
+    "precision": 0.8189,
+    "recall": 1.0,
+    "f1_score": 0.9004,
+    "faithfulness": 0,
+    "answer_relevancy": 0,
+    "context_recall": 1.0,
+    "context_precision": 0.8189,
+    "config": {
+      "description": "混合检索 + 重排序测试",
+      "retrieval_type": "hybrid",
+      "vector_top_k": 20,
+      "keyword_top_k": 20,
+      "fusion_weights": {
+        "vector": 0.6,
+        "keyword": 0.4
+      },
+      "rerank_enabled": true,
+      "rerank_top_k": 5
+    },
+    "details": [
+      {
+        "question": "理财产品按照风险等级可以分为哪几类？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是风险测评？有什么意义？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "投资者风险等级分为哪几类？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "基金定投有什么优势？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "货币基金的年化收益率大概是多少？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "资产配置的核心原则有哪些？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是年龄法则？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "基金投资涉及哪些费用？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "常见的投资风险有哪些？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "投资者享有哪些权益？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "股票按照市值规模可以分为哪几类？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是市盈率？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "价值投资的核心原则是什么？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "债券按发行主体可以分为哪几类？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "债券价格与市场利率是什么关系？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "重疾险的投保建议是什么？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "家庭保险配置的原则是什么？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "期货的保证金制度是什么？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "养老规划的三大支柱是什么？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是夏普比率？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "R1级理财产品适合哪类投资者？有什么特点？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "股票基金的申购费和赎回费分别是多少？如何降低费用？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "保守型投资者应该如何进行资产配置？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是套期保值？期货如何帮助企业管理风险？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "个人养老金制度有什么税收优惠？年度缴费上限是多少？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是看涨期权和看跌期权？它们有什么区别？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "外汇市场有什么特点？日均交易量是多少？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "房产投资的租金回报率如何计算？一线城市大概是多少？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "金融市场的核心功能有哪些？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "货币市场和资本市场有什么区别？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "股票发行市场和流通市场有什么区别？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "股票交易实行什么制度？涨跌幅限制是多少？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "债券投资有哪些风险？如何管理信用风险？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是VaR（在险价值）？如何计算？",
+        "precision": 0.2,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是行为金融学？常见的投资行为偏差有哪些？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 6
+      },
+      {
+        "question": "什么是均值-方差模型？有什么应用？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是Black-Litterman模型？有什么优势？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是风险平价模型？有什么特点？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是Brinson模型？如何进行业绩归因分析？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是特雷诺比率？与夏普比率有什么区别？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是詹森阿尔法？如何判断投资管理人的能力？",
+        "precision": 0.2,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是信息比率？适用于什么场景？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是最大回撤？如何计算？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是条件在险价值（CVaR）？与VaR有什么区别？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "开放式基金和封闭式基金有什么区别？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是目标日期基金？有什么特点？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是复利效应？每月投资2000元，年化收益率8%，30年后有多少？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是骑乘策略？如何通过债券期限获利？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是套息交易？有什么风险？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是强行平仓制度？什么情况下会被强平？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是欧式期权和美式期权？有什么区别？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "医疗险有哪些类型？百万医疗险有什么特点？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是定期寿险和终身寿险？分别适合什么人群？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-05-05T18:54:38.677604",
+    "precision": 0.8189,
+    "recall": 1.0,
+    "f1_score": 0.9004,
+    "faithfulness": 0,
+    "answer_relevancy": 0,
+    "context_recall": 1.0,
+    "context_precision": 0.8189,
+    "config": {
+      "description": "混合检索 + 重排序测试 (权重0.5:0.5)",
+      "retrieval_type": "hybrid",
+      "vector_top_k": 20,
+      "keyword_top_k": 20,
+      "fusion_weights": {
+        "vector": 0.5,
+        "keyword": 0.5
+      },
+      "rerank_enabled": true,
+      "rerank_top_k": 5
+    },
+    "details": [
+      {
+        "question": "理财产品按照风险等级可以分为哪几类？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是风险测评？有什么意义？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "投资者风险等级分为哪几类？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "基金定投有什么优势？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "货币基金的年化收益率大概是多少？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "资产配置的核心原则有哪些？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是年龄法则？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "基金投资涉及哪些费用？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "常见的投资风险有哪些？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "投资者享有哪些权益？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "股票按照市值规模可以分为哪几类？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是市盈率？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "价值投资的核心原则是什么？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "债券按发行主体可以分为哪几类？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "债券价格与市场利率是什么关系？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "重疾险的投保建议是什么？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "家庭保险配置的原则是什么？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "期货的保证金制度是什么？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "养老规划的三大支柱是什么？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是夏普比率？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "R1级理财产品适合哪类投资者？有什么特点？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "股票基金的申购费和赎回费分别是多少？如何降低费用？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "保守型投资者应该如何进行资产配置？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是套期保值？期货如何帮助企业管理风险？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "个人养老金制度有什么税收优惠？年度缴费上限是多少？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是看涨期权和看跌期权？它们有什么区别？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "外汇市场有什么特点？日均交易量是多少？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "房产投资的租金回报率如何计算？一线城市大概是多少？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "金融市场的核心功能有哪些？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "货币市场和资本市场有什么区别？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "股票发行市场和流通市场有什么区别？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "股票交易实行什么制度？涨跌幅限制是多少？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "债券投资有哪些风险？如何管理信用风险？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是VaR（在险价值）？如何计算？",
+        "precision": 0.2,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是行为金融学？常见的投资行为偏差有哪些？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 6
+      },
+      {
+        "question": "什么是均值-方差模型？有什么应用？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是Black-Litterman模型？有什么优势？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是风险平价模型？有什么特点？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是Brinson模型？如何进行业绩归因分析？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是特雷诺比率？与夏普比率有什么区别？",
+        "precision": 0.6,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是詹森阿尔法？如何判断投资管理人的能力？",
+        "precision": 0.2,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是信息比率？适用于什么场景？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      },
+      {
+        "question": "什么是最大回撤？如何计算？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是条件在险价值（CVaR）？与VaR有什么区别？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "开放式基金和封闭式基金有什么区别？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 4
+      },
+      {
+        "question": "什么是目标日期基金？有什么特点？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是复利效应？每月投资2000元，年化收益率8%，30年后有多少？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是骑乘策略？如何通过债券期限获利？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是套息交易？有什么风险？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是强行平仓制度？什么情况下会被强平？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "什么是欧式期权和美式期权？有什么区别？",
+        "precision": 0.4,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 2
+      },
+      {
+        "question": "医疗险有哪些类型？百万医疗险有什么特点？",
+        "precision": 0.8,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 5
+      },
+      {
+        "question": "什么是定期寿险和终身寿险？分别适合什么人群？",
+        "precision": 1.0,
+        "recall": 1.0,
+        "retrieved_count": 5,
+        "relevant_found": 3
+      }
+    ]
+  }
+]
